@@ -1,0 +1,4 @@
+interface:
+  display_name: "JDY Git Sync"
+  short_description: "Commit and push JDY changes safely."
+  default_prompt: "Use the JDY Git sync rules for commit and push decisions."

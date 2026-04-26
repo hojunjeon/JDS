@@ -1,0 +1,4 @@
+interface:
+  display_name: "JDY Prompt Diary"
+  short_description: "Write JDY prompt diary entries."
+  default_prompt: "Use the JDY prompt diary rules for this development moment."

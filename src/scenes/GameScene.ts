@@ -1,0 +1,311 @@
+import Phaser from 'phaser';
+import { enemies, stages, weapons } from '../data/gameData';
+import { EventSystem } from '../systems/EventSystem';
+import { WeaponSystem } from '../systems/WeaponSystem';
+import type { EnemyConfig, EnemyId, WeaponConfig, WeaponId } from '../types';
+
+interface EnemyActor {
+  id: EnemyId;
+  hp: number;
+  sprite: Phaser.GameObjects.Arc;
+  config: EnemyConfig;
+}
+
+interface ProjectileActor {
+  damage: number;
+  velocity: Phaser.Math.Vector2;
+  sprite: Phaser.GameObjects.Arc;
+  ttl: number;
+}
+
+interface BossActor {
+  hp: number;
+  maxHp: number;
+  sprite: Phaser.GameObjects.Arc;
+}
+
+export class GameScene extends Phaser.Scene {
+  private player!: Phaser.GameObjects.Arc;
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private keys!: Record<string, Phaser.Input.Keyboard.Key>;
+  private enemies: EnemyActor[] = [];
+  private projectiles: ProjectileActor[] = [];
+  private boss: BossActor | null = null;
+  private weaponSystem = new WeaponSystem();
+  private eventSystem = new EventSystem(stages[0]);
+  private elapsedSec = 0;
+  private spawnTimer = 0;
+  private kills = 0;
+  private hp = 100;
+  private banner!: Phaser.GameObjects.Text;
+  private hud!: Phaser.GameObjects.Text;
+  private eventLog!: Phaser.GameObjects.Text;
+  private selectedWeapon: WeaponId = 'python';
+  private isEnded = false;
+
+  constructor() {
+    super('GameScene');
+  }
+
+  init(data: { weapon?: WeaponId }): void {
+    this.selectedWeapon = data.weapon ?? 'python';
+  }
+
+  create(): void {
+    this.cameras.main.setBounds(0, 0, 2200, 1600);
+    this.drawWorldGrid();
+    this.player = this.add.circle(1100, 800, 16, 0x4fc3f7).setStrokeStyle(2, 0x0ff0d0);
+    this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
+    this.cursors = this.input.keyboard!.createCursorKeys();
+    this.keys = this.input.keyboard!.addKeys('W,A,S,D,R,ESC') as Record<string, Phaser.Input.Keyboard.Key>;
+    this.weaponSystem.addWeapon(this.selectedWeapon);
+
+    this.hud = this.add.text(18, 14, '', {
+      fontFamily: 'monospace',
+      fontSize: '15px',
+      color: '#d7dee8',
+      backgroundColor: '#0b1020',
+      padding: { left: 10, right: 10, top: 8, bottom: 8 },
+    }).setScrollFactor(0).setDepth(100);
+    this.eventLog = this.add.text(18, 554, 'boot: Stage 1 session opened', {
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      color: '#65d6ad',
+      backgroundColor: '#0b1020',
+      padding: { left: 10, right: 10, top: 8, bottom: 8 },
+    }).setScrollFactor(0).setDepth(100);
+    this.banner = this.add.text(480, 96, '', {
+      fontFamily: 'monospace',
+      fontSize: '24px',
+      color: '#05070d',
+      backgroundColor: '#f5c542',
+      padding: { left: 14, right: 14, top: 8, bottom: 8 },
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(101).setVisible(false);
+
+    this.input.keyboard?.on('keydown-R', () => this.scene.restart({ weapon: this.selectedWeapon }));
+    this.input.keyboard?.on('keydown-ESC', () => this.scene.start('MenuScene'));
+  }
+
+  update(_time: number, deltaMs: number): void {
+    if (this.isEnded) return;
+    const dt = deltaMs / 1000;
+    this.elapsedSec += dt;
+    this.updatePlayer(dt);
+    this.updateSpawns(dt);
+    this.updateWeapons(deltaMs);
+    this.updateEnemies(dt);
+    this.updateProjectiles(dt);
+    this.updateEvents(dt);
+    this.updateHud();
+    if (this.hp <= 0) this.endRun(false);
+  }
+
+  private updatePlayer(dt: number): void {
+    const dir = new Phaser.Math.Vector2(0, 0);
+    if (this.cursors.left.isDown || this.keys.A.isDown) dir.x -= 1;
+    if (this.cursors.right.isDown || this.keys.D.isDown) dir.x += 1;
+    if (this.cursors.up.isDown || this.keys.W.isDown) dir.y -= 1;
+    if (this.cursors.down.isDown || this.keys.S.isDown) dir.y += 1;
+    if (dir.lengthSq() > 0) dir.normalize();
+    this.player.x = Phaser.Math.Clamp(this.player.x + dir.x * 220 * dt, 24, 2176);
+    this.player.y = Phaser.Math.Clamp(this.player.y + dir.y * 220 * dt, 24, 1576);
+  }
+
+  private updateSpawns(dt: number): void {
+    this.spawnTimer -= dt;
+    if (this.spawnTimer > 0 || this.boss) return;
+    this.spawnTimer = Math.max(0.35, 1.15 - this.elapsedSec / 160);
+    const activeEvent = this.eventSystem.getActiveEvents()[0];
+    const stage = stages[0];
+    const eventConfig = activeEvent ? stage.events.find((event) => event.id === activeEvent.id) : undefined;
+    const type = eventConfig?.targetEnemy ?? Phaser.Utils.Array.GetRandom(stage.enemyPool);
+    const amount = activeEvent ? 2 : 1 + Math.floor(this.elapsedSec / 35);
+    for (let i = 0; i < amount; i += 1) this.spawnEnemy(type);
+  }
+
+  private spawnEnemy(id: EnemyId): void {
+    const config = enemies[id];
+    const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+    const radius = 380;
+    const x = Phaser.Math.Clamp(this.player.x + Math.cos(angle) * radius, 30, 2170);
+    const y = Phaser.Math.Clamp(this.player.y + Math.sin(angle) * radius, 30, 1570);
+    const sprite = this.add.circle(x, y, config.radius, config.color, 0.95).setStrokeStyle(1, 0x05070d);
+    this.enemies.push({ id, hp: config.hp, sprite, config });
+  }
+
+  private updateWeapons(deltaMs: number): void {
+    for (const weapon of this.weaponSystem.update(deltaMs)) {
+      this.fireWeapon(weapon);
+    }
+  }
+
+  private fireWeapon(weapon: WeaponConfig): void {
+    const targets = [...this.enemies.map((enemy) => enemy.sprite), ...(this.boss ? [this.boss.sprite] : [])];
+    const target = targets.sort((a, b) => Phaser.Math.Distance.Squared(this.player.x, this.player.y, a.x, a.y) - Phaser.Math.Distance.Squared(this.player.x, this.player.y, b.x, b.y))[0];
+    const base = target
+      ? new Phaser.Math.Vector2(target.x - this.player.x, target.y - this.player.y).normalize()
+      : new Phaser.Math.Vector2(1, 0);
+    const bursts = weapon.id === 'javascript' ? 3 : weapon.id === 'django' ? 5 : 1;
+    for (let i = 0; i < bursts; i += 1) {
+      const spread = bursts === 1 ? 0 : Phaser.Math.DegToRad((i - (bursts - 1) / 2) * 16);
+      const dir = base.clone().rotate(spread);
+      const sprite = this.add.circle(this.player.x, this.player.y, weapon.id === 'sql' ? 9 : 5, weapon.color);
+      this.projectiles.push({
+        damage: weapon.damage,
+        velocity: dir.scale(weapon.projectileSpeed),
+        sprite,
+        ttl: weapon.id === 'sql' ? 1.4 : 2.2,
+      });
+    }
+    if (weapon.id === 'git') {
+      this.cameras.main.shake(90, 0.003);
+    }
+  }
+
+  private updateEnemies(dt: number): void {
+    for (const enemy of this.enemies) {
+      const dir = new Phaser.Math.Vector2(this.player.x - enemy.sprite.x, this.player.y - enemy.sprite.y);
+      if (dir.lengthSq() > 0) dir.normalize();
+      const sign = enemy.config.behavior === 'flee' ? -1 : 1;
+      enemy.sprite.x += dir.x * enemy.config.speed * sign * dt;
+      enemy.sprite.y += dir.y * enemy.config.speed * sign * dt;
+      if (Phaser.Math.Distance.Between(enemy.sprite.x, enemy.sprite.y, this.player.x, this.player.y) < enemy.config.radius + 16) {
+        this.hp -= enemy.config.contactDamage * dt;
+      }
+    }
+    if (this.boss) {
+      const dir = new Phaser.Math.Vector2(this.player.x - this.boss.sprite.x, this.player.y - this.boss.sprite.y).normalize();
+      this.boss.sprite.x += dir.x * 72 * dt;
+      this.boss.sprite.y += dir.y * 72 * dt;
+      if (Phaser.Math.Distance.Between(this.boss.sprite.x, this.boss.sprite.y, this.player.x, this.player.y) < 50) {
+        this.hp -= 20 * dt;
+      }
+    }
+  }
+
+  private updateProjectiles(dt: number): void {
+    for (const projectile of this.projectiles) {
+      projectile.sprite.x += projectile.velocity.x * dt;
+      projectile.sprite.y += projectile.velocity.y * dt;
+      projectile.ttl -= dt;
+      for (const enemy of this.enemies) {
+        if (Phaser.Math.Distance.Between(projectile.sprite.x, projectile.sprite.y, enemy.sprite.x, enemy.sprite.y) < enemy.config.radius + 7) {
+          enemy.hp -= projectile.damage;
+          projectile.ttl = 0;
+          projectile.sprite.setScale(1.8);
+          break;
+        }
+      }
+      if (this.boss && Phaser.Math.Distance.Between(projectile.sprite.x, projectile.sprite.y, this.boss.sprite.x, this.boss.sprite.y) < 42) {
+        this.boss.hp -= projectile.damage;
+        projectile.ttl = 0;
+      }
+    }
+
+    this.projectiles = this.projectiles.filter((projectile) => {
+      const keep = projectile.ttl > 0;
+      if (!keep) projectile.sprite.destroy();
+      return keep;
+    });
+
+    this.enemies = this.enemies.filter((enemy) => {
+      const alive = enemy.hp > 0;
+      if (!alive) {
+        this.kills += 1;
+        const completed = this.eventSystem.notifyKill(enemy.id);
+        completed.forEach((event) => this.showBanner(`${event.id.toUpperCase()} complete: ${event.rewardText}`));
+        if (enemy.id === 'heal_bug') this.hp = Math.min(100, this.hp + 8);
+        enemy.sprite.destroy();
+      }
+      return alive;
+    });
+
+    if (this.boss && this.boss.hp <= 0) {
+      this.boss.sprite.destroy();
+      this.boss = null;
+      this.endRun(true);
+    }
+  }
+
+  private updateEvents(dt: number): void {
+    const triggered = this.eventSystem.update(this.elapsedSec, dt);
+    triggered.forEach((event) => {
+      if (event.id === 'boss') {
+        this.spawnBoss();
+      }
+      this.showBanner(event.title);
+      this.eventLog.setText(`event: ${event.dialogue}\nreward: ${event.rewardText}`);
+    });
+  }
+
+  private spawnBoss(): void {
+    if (this.boss) return;
+    const bossConfig = stages[0].boss;
+    const sprite = this.add.circle(this.player.x + 320, this.player.y - 260, 34, bossConfig.color).setStrokeStyle(3, 0xffffff);
+    this.boss = { hp: bossConfig.hp, maxHp: bossConfig.hp, sprite };
+    this.enemies.forEach((enemy) => enemy.sprite.destroy());
+    this.enemies = [];
+    this.cameras.main.shake(260, 0.008);
+  }
+
+  private updateHud(): void {
+    const eventStates = ['q1', 'e1', 'e2', 'boss']
+      .map((id) => this.eventSystem.getState(id as never))
+      .map((state) => `${state.id}:${state.completed ? 'done' : state.active ? 'run' : 'wait'}:${state.progress}`)
+      .join(' | ');
+    const bossLine = this.boss ? `\nboss.hp = ${Math.max(0, Math.ceil(this.boss.hp))}/${this.boss.maxHp}` : '';
+    this.hud.setText([
+      `stage = "${stages[0].title}"`,
+      `hp = ${Math.max(0, Math.ceil(this.hp))}/100   kills = ${this.kills}   time = ${Math.floor(this.elapsedSec)}s`,
+      `weapon = ${weapons[this.selectedWeapon].codeName}`,
+      eventStates + bossLine,
+      'move: WASD/arrows | R: restart | ESC: menu',
+    ]);
+  }
+
+  private showBanner(text: string): void {
+    this.banner.setText(text).setVisible(true);
+    this.tweens.killTweensOf(this.banner);
+    this.banner.setAlpha(1);
+    this.tweens.add({
+      targets: this.banner,
+      alpha: 0,
+      delay: 1400,
+      duration: 500,
+      onComplete: () => this.banner.setVisible(false),
+    });
+  }
+
+  private endRun(clear: boolean): void {
+    this.isEnded = true;
+    const text = clear
+      ? 'git push origin stage-2  // Stage 1 clear'
+      : 'throw new GameOverError("session crashed")';
+    this.add.rectangle(this.cameras.main.scrollX + 480, this.cameras.main.scrollY + 320, 620, 180, 0x0b1020, 0.96)
+      .setStrokeStyle(1, clear ? 0x65d6ad : 0xff5c7a)
+      .setDepth(200);
+    this.add.text(this.cameras.main.scrollX + 210, this.cameras.main.scrollY + 272, text, {
+      fontFamily: 'monospace',
+      fontSize: '22px',
+      color: clear ? '#65d6ad' : '#ff5c7a',
+    }).setDepth(201);
+    this.add.text(this.cameras.main.scrollX + 290, this.cameras.main.scrollY + 330, '[ R ] restart   [ ESC ] menu', {
+      fontFamily: 'monospace',
+      fontSize: '18px',
+      color: '#d7dee8',
+    }).setDepth(201);
+  }
+
+  private drawWorldGrid(): void {
+    const g = this.add.graphics();
+    g.lineStyle(1, 0x111827, 1);
+    for (let x = 0; x <= 2200; x += 80) {
+      g.lineBetween(x, 0, x, 1600);
+    }
+    for (let y = 0; y <= 1600; y += 80) {
+      g.lineBetween(0, y, 2200, y);
+    }
+    g.lineStyle(2, 0x2f3b52, 1);
+    g.strokeRect(0, 0, 2200, 1600);
+  }
+}
