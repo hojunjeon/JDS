@@ -1,9 +1,9 @@
 ---
-name: jdy-development-workflow
-description: Use when changing JDY features, UI, gameplay, behavior, project workflow, specs, implementation plans, tests, or verification habits.
+name: jds-development-workflow
+description: Use when changing JDS features, UI, gameplay, behavior, project workflow, specs, implementation plans, tests, or verification habits.
 ---
 
-# JDY Development Workflow
+# JDS Development Workflow
 
 Use this as the project-specific wrapper around the installed `superpowers` skills.
 
@@ -18,6 +18,23 @@ Use this as the project-specific wrapper around the installed `superpowers` skil
 7. After verification, always propose both product improvements and Codex workflow improvements.
 
 If a request conflicts with `DESIGN.md`, explain the conflict and ask whether to update the design guide.
+
+## Subagent Policy
+
+Use subagents selectively, not by default. The main agent remains the decision-maker, integrator, and owner of completion claims. Follow `docs/subagents.md` for role definitions and task-size criteria.
+
+Preferred starting roles:
+
+- `Explorer`: read-only project discovery for related files, tests, patterns, risks, and impact scope.
+- `Design Reviewer`: independent `DESIGN.md`, UI/UX, gameplay, and game-feel review.
+- `Worker`: bounded implementation with explicit file or module ownership.
+- `Verifier`: independent tests, builds, screenshots, manual checks, and residual-risk review.
+
+Default by size:
+
+- Small: main agent only; add `Verifier` only for user-visible or release risk.
+- Medium: add `Explorer` when scope is unclear and `Verifier` after implementation; add `Design Reviewer` for UI/gameplay/visual work.
+- Large: use `Explorer`, relevant `Design Reviewer`, bounded `Worker` roles with disjoint write ownership, and `Verifier` after integration.
 
 ## Improvement Review
 

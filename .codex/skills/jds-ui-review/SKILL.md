@@ -1,11 +1,11 @@
 ---
-name: jdy-ui-review
-description: Use when reviewing or improving JDY screens, HUD, menus, responsive layout, visual hierarchy, UI controls, accessibility, or browser screenshots.
+name: jds-ui-review
+description: Use when reviewing or improving JDS screens, HUD, menus, responsive layout, visual hierarchy, UI controls, accessibility, or browser screenshots.
 ---
 
-# JDY UI Review
+# JDS UI Review
 
-Use this skill for UI quality checks in the JDY project.
+Use this skill for UI quality checks in the JDS project.
 
 ## Design Reference
 

@@ -1,9 +1,9 @@
 ---
-name: jdy-prompt-diary
-description: Use when a JDY user prompt changes the overall development process, collaboration workflow, project direction, prompt habits, specs, plans, commits, or documentation habits.
+name: jds-prompt-diary
+description: Use when a JDS user prompt changes the overall development process, collaboration workflow, project direction, prompt habits, specs, plans, commits, or documentation habits.
 ---
 
-# JDY Prompt Diary
+# JDS Prompt Diary
 
 Write a prompt diary when a prompt changes the project at the development-process level, not merely at the feature level.
 

@@ -1,9 +1,9 @@
 ---
-name: jdy-game-design-review
-description: Use when reviewing or improving JDY gameplay, combat, enemies, weapons, rewards, difficulty, pacing, feedback, game feel, or Phaser game systems.
+name: jds-game-design-review
+description: Use when reviewing or improving JDS gameplay, combat, enemies, weapons, rewards, difficulty, pacing, feedback, game feel, or Phaser game systems.
 ---
 
-# JDY Game Design Review
+# JDS Game Design Review
 
 Use this skill to evaluate gameplay changes beyond code correctness.
 

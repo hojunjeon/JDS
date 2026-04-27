@@ -1,4 +1,4 @@
-# JDY Design Guide
+# JDS Design Guide
 
 This document is the visual and technical design reference for JY Survival. Use it when implementing screens, HUD, weapons, monster sprites, effects, and Phaser systems.
 

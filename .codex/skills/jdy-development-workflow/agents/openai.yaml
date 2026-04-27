@@ -1,4 +1,0 @@
-interface:
-  display_name: "JDY Development Workflow"
-  short_description: "Run the JDY project development workflow."
-  default_prompt: "Use the JDY development workflow for this project request."

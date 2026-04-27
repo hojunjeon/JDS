@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JDS 05 Level Up Upgrade Modal - Frontend Design</title>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --sidebar: #252526;
+      --status: #007acc;
+      --white: #d4d4d4;
+      --dim: #858585;
+      --teal: #4ec9b0;
+      --blue: #9cdcfe;
+      --green: #b5cea8;
+      --yellow: #dcdcaa;
+      --orange: #ce9178;
+      --red: #f44747;
+      --comment: #6a9955;
+      --line: #3c3c3c;
+      --panel: rgba(32, 32, 32, 0.92);
+      --panel2: rgba(18, 18, 18, 0.92);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        radial-gradient(circle at 50% 48%, rgba(78, 201, 176, 0.09), transparent 360px),
+        radial-gradient(circle at 75% 24%, rgba(220, 220, 170, 0.06), transparent 280px),
+        var(--bg);
+      background-size: 100% 4px, 56px 56px, auto, auto, auto;
+      color: var(--white);
+      font-family: "JetBrains Mono", "Space Mono", "Noto Sans KR", Consolas, monospace;
+    }
+
+    .screen {
+      min-height: 100vh;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .terminal {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: rgba(30, 30, 30, 0.96);
+      box-shadow:
+        0 0 0 1px rgba(78, 201, 176, 0.04),
+        0 0 34px rgba(78, 201, 176, 0.12);
+      display: grid;
+      grid-template-rows: 34px minmax(0, 1fr) 28px;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .terminal::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: 34px 0 28px;
+      z-index: 30;
+      opacity: 0.42;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.026),
+        rgba(255, 255, 255, 0.026) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+    }
+
+    .titlebar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--line);
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #28c840; }
+
+    .window-title {
+      margin-left: 8px;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .arena {
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(156, 220, 254, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(156, 220, 254, 0.035) 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, rgba(78, 201, 176, 0.12), transparent 270px),
+        #151515;
+      background-size: 36px 36px, 36px 36px, auto, auto;
+    }
+
+    .arena::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 5, 5, 0.38);
+      backdrop-filter: blur(2px);
+      z-index: 5;
+    }
+
+    .hud {
+      position: absolute;
+      inset: 12px;
+      display: grid;
+      grid-template-rows: 94px minmax(0, 1fr) 74px;
+      gap: 10px;
+      opacity: 0.62;
+      filter: saturate(0.7);
+      z-index: 1;
+    }
+
+    .top-hud,
+    .bottom-hud {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr) 270px;
+      gap: 10px;
+    }
+
+    .bottom-hud {
+      grid-template-columns: minmax(0, 1fr) 280px;
+    }
+
+    .panel {
+      min-width: 0;
+      border: 1px solid rgba(212, 212, 212, 0.14);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+    }
+
+    .hud-block {
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat-line {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 72px;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .meter {
+      min-width: 0;
+      height: 8px;
+      border: 1px solid rgba(212, 212, 212, 0.17);
+      background: #111;
+      overflow: hidden;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: var(--v);
+      background: linear-gradient(90deg, var(--c1), var(--c2));
+    }
+
+    .timer {
+      display: grid;
+      place-items: center;
+      padding: 9px 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid var(--teal);
+      border-right: 3px solid var(--teal);
+      text-align: center;
+    }
+
+    .timer strong {
+      color: var(--white);
+      font-size: 42px;
+      line-height: 1;
+    }
+
+    .timer span {
+      color: var(--comment);
+      font-size: 12px;
+    }
+
+    .mini-arena {
+      position: relative;
+      min-height: 0;
+    }
+
+    .hero,
+    .mob,
+    .bolt {
+      position: absolute;
+    }
+
+    .hero {
+      left: 49%;
+      top: 52%;
+      width: 34px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      border: 2px solid var(--teal);
+      background: rgba(78, 201, 176, 0.14);
+      box-shadow: 0 0 32px rgba(78, 201, 176, 0.48);
+    }
+
+    .hero::before {
+      content: "JY";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .mob {
+      width: 46px;
+      height: 30px;
+      border: 1px solid currentColor;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      background: rgba(20, 20, 20, 0.82);
+    }
+
+    .mob.syntax { color: var(--red); left: 22%; top: 26%; }
+    .mob.null { color: var(--blue); right: 24%; top: 24%; }
+    .mob.indent { color: var(--orange); left: 30%; bottom: 20%; }
+    .mob.env { color: var(--yellow); right: 18%; bottom: 28%; width: 58px; }
+
+    .bolt {
+      left: 49%;
+      top: 52%;
+      height: 3px;
+      width: 128px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, var(--teal), var(--blue), transparent);
+      filter: drop-shadow(0 0 8px rgba(156, 220, 254, 0.65));
+      animation: cast 1.5s ease-in-out infinite;
+    }
+
+    .bolt.b1 { transform: rotate(20deg) translateX(20px); }
+    .bolt.b2 { transform: rotate(136deg) translateX(20px); animation-delay: 0.2s; }
+    .bolt.b3 { transform: rotate(238deg) translateX(20px); animation-delay: 0.4s; }
+
+    .weapons {
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .slot {
+      min-width: 0;
+      min-height: 54px;
+      border: 1px solid rgba(212, 212, 212, 0.13);
+      background: rgba(255, 255, 255, 0.025);
+      padding: 8px;
+      display: grid;
+      align-content: space-between;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    .slot b {
+      color: var(--white);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event {
+      padding: 10px;
+      display: grid;
+      align-content: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .level-modal {
+      position: absolute;
+      z-index: 12;
+      left: 50%;
+      top: 50%;
+      width: min(930px, calc(100vw - 76px));
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(78, 201, 176, 0.52);
+      background:
+        linear-gradient(135deg, rgba(78, 201, 176, 0.08), transparent 42%),
+        linear-gradient(315deg, rgba(220, 220, 170, 0.07), transparent 36%),
+        rgba(24, 24, 24, 0.98);
+      box-shadow:
+        0 0 0 1px rgba(78, 201, 176, 0.08),
+        0 20px 80px rgba(0, 0, 0, 0.5),
+        0 0 34px rgba(78, 201, 176, 0.16);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      overflow: hidden;
+    }
+
+    .modal-head {
+      min-width: 0;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 230px;
+      gap: 18px;
+      align-items: start;
+      background: rgba(37, 37, 38, 0.82);
+    }
+
+    .eyebrow {
+      color: var(--comment);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--white);
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 0.96;
+      letter-spacing: 0;
+      text-shadow: 0 0 18px rgba(78, 201, 176, 0.12);
+    }
+
+    .summary {
+      margin-top: 10px;
+      color: var(--dim);
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 650px;
+    }
+
+    .quick-fix {
+      border: 1px solid rgba(78, 201, 176, 0.28);
+      border-left: 3px solid var(--teal);
+      background: var(--panel2);
+      padding: 11px;
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--dim);
+    }
+
+    .quick-fix b {
+      color: var(--teal);
+      font-size: 18px;
+    }
+
+    .quick-fix code {
+      font: inherit;
+      color: var(--white);
+      overflow-wrap: anywhere;
+    }
+
+    .choices {
+      min-height: 0;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .choice {
+      min-width: 0;
+      min-height: 272px;
+      border: 1px solid rgba(212, 212, 212, 0.13);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 42%),
+        rgba(24, 24, 24, 0.86);
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choice::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      bottom: -1px;
+      width: 4px;
+      background: var(--accent);
+      opacity: 0.86;
+    }
+
+    .choice.active {
+      border-color: color-mix(in srgb, var(--accent) 72%, transparent);
+      box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 16%, transparent);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, transparent), transparent 50%),
+        rgba(24, 24, 24, 0.9);
+    }
+
+    .choice-head {
+      min-width: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .choice-index {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      flex: 0 0 auto;
+    }
+
+    .choice h2 {
+      margin: 0;
+      color: var(--white);
+      font-size: 19px;
+      line-height: 1.14;
+    }
+
+    .snippet {
+      min-width: 0;
+      border: 1px solid rgba(212, 212, 212, 0.1);
+      background: rgba(8, 8, 8, 0.58);
+      padding: 10px;
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--dim);
+    }
+
+    .snippet span {
+      overflow-wrap: anywhere;
+    }
+
+    .kw { color: var(--blue); }
+    .fn { color: var(--yellow); }
+    .str { color: var(--orange); }
+    .num { color: var(--green); }
+    .var { color: var(--teal); }
+    .comment { color: var(--comment); }
+
+    .impact {
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--dim);
+    }
+
+    .impact-row {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr) 44px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .choice-button {
+      min-height: 38px;
+      border: 1px solid color-mix(in srgb, var(--accent) 52%, transparent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      color: var(--accent);
+      font: inherit;
+      font-size: 12px;
+      text-align: left;
+      padding: 0 11px;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    .choice.active .choice-button {
+      background: var(--accent);
+      color: #101010;
+      font-weight: 700;
+    }
+
+    .modal-foot {
+      border-top: 1px solid var(--line);
+      padding: 11px 16px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      gap: 14px;
+      align-items: center;
+      background: rgba(18, 18, 18, 0.9);
+      font-size: 12px;
+      color: var(--dim);
+    }
+
+    .commit {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .commit code {
+      font: inherit;
+      color: var(--white);
+      overflow-wrap: anywhere;
+    }
+
+    .apply-progress {
+      display: grid;
+      gap: 6px;
+    }
+
+    .apply-progress .meter span {
+      animation: apply 1.8s ease-in-out infinite;
+    }
+
+    .statusbar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 12px;
+      background: var(--status);
+      color: #fff;
+      font-size: 12px;
+      z-index: 40;
+    }
+
+    .hint {
+      color: var(--dim);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .teal { color: var(--teal); }
+    .blue { color: var(--blue); }
+    .green { color: var(--green); }
+    .yellow { color: var(--yellow); }
+    .red { color: var(--red); }
+    .orange { color: var(--orange); }
+    .dim { color: var(--dim); }
+
+    @keyframes cast {
+      0%, 100% { opacity: 0.28; width: 58px; }
+      48% { opacity: 1; width: 142px; }
+    }
+
+    @keyframes apply {
+      0%, 100% { width: 18%; }
+      55% { width: 86%; }
+    }
+
+    @media (max-width: 1060px) {
+      body {
+        overflow: auto;
+      }
+
+      .terminal {
+        min-height: 960px;
+      }
+
+      .hud {
+        grid-template-rows: 150px minmax(0, 1fr) 112px;
+      }
+
+      .top-hud {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .timer {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
+
+      .level-modal {
+        top: 52%;
+      }
+
+      .choices {
+        grid-template-columns: 1fr;
+      }
+
+      .choice {
+        min-height: 210px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .screen {
+        padding: 10px;
+      }
+
+      .terminal {
+        min-height: 1560px;
+        grid-template-rows: 34px minmax(0, 1fr) auto;
+      }
+
+      .hud {
+        display: none;
+      }
+
+      .level-modal {
+        width: calc(100vw - 42px);
+        top: 20px;
+        transform: translateX(-50%);
+      }
+
+      .modal-head,
+      .modal-foot {
+        grid-template-columns: 1fr;
+      }
+
+      .choices {
+        padding: 12px;
+      }
+
+      .choice {
+        min-height: 230px;
+      }
+
+      .impact-row {
+        grid-template-columns: 74px minmax(0, 1fr) 38px;
+      }
+
+      .statusbar {
+        min-height: 28px;
+        flex-wrap: wrap;
+        padding: 6px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="JDS screen 05 level up upgrade modal using frontend-design and DESIGN.md">
+    <section class="terminal">
+      <header class="titlebar">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="window-title">jiyoon@ssafy: ~/debug-survival/quickfix.levelup</span>
+      </header>
+
+      <section class="arena" aria-label="paused combat with level up modal">
+        <div class="hud" aria-hidden="true">
+          <div class="top-hud">
+            <div class="panel hud-block">
+              <div class="label">Player Runtime</div>
+              <div class="stat-line">
+                <span class="red">HP</span>
+                <div class="meter"><span style="--v: 68%; --c1: var(--red); --c2: var(--orange)"></span></div>
+                <span>68 / 100</span>
+              </div>
+              <div class="stat-line">
+                <span class="green">EXP</span>
+                <div class="meter"><span style="--v: 100%; --c1: var(--green); --c2: var(--teal)"></span></div>
+                <span>Lv. 04</span>
+              </div>
+            </div>
+
+            <div class="panel timer">
+              <strong>02:58</strong>
+              <span>Stage 1 / Python Basics / Level Up</span>
+            </div>
+
+            <div class="panel hud-block">
+              <div class="label">Selected Weapon</div>
+              <strong class="teal">Python.py</strong>
+              <span class="dim">cooldown 0.62s · coverage 360deg</span>
+            </div>
+          </div>
+
+          <div class="mini-arena">
+            <div class="mob syntax">ERR</div>
+            <div class="mob null">NULL</div>
+            <div class="mob indent">TAB</div>
+            <div class="mob env">ENV</div>
+            <div class="bolt b1"></div>
+            <div class="bolt b2"></div>
+            <div class="bolt b3"></div>
+            <div class="hero"></div>
+          </div>
+
+          <div class="bottom-hud">
+            <div class="panel weapons">
+              <div class="slot"><b>Python.py</b><span class="teal">ready</span></div>
+              <div class="slot"><b>Java.class</b><span class="yellow">orbit 41%</span></div>
+              <div class="slot"><b>Git.sh</b><span>locked</span></div>
+              <div class="slot"><b>SQL.sql</b><span>locked</span></div>
+              <div class="slot"><b>empty</b><span>slot 05</span></div>
+            </div>
+            <div class="panel event">
+              <span class="label">Event Queue</span>
+              <b class="yellow">T+25 Indentation Panic</b>
+              <span class="dim">paused while quick fix is open</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="level-modal" aria-label="level up upgrade modal">
+          <header class="modal-head">
+            <div>
+              <div class="eyebrow">// EXP buffer reached threshold</div>
+              <h1>Quick Fix</h1>
+              <div class="summary">
+                Lv.04 자동완성 후보가 열렸습니다. 하나의 패치를 적용하면 전투가 재개되고 선택 기록이 run log에 남습니다.
+              </div>
+            </div>
+
+            <div class="quick-fix">
+              <span class="label">Upgrade Context</span>
+              <b>Level 03 -> 04</b>
+              <code><span class="teal">player</span>.<span class="yellow">applyPatch</span>(selected)</code>
+            </div>
+          </header>
+
+          <section class="choices" aria-label="upgrade choices">
+            <article class="choice active" style="--accent: var(--teal)">
+              <div class="choice-head">
+                <span>weapon.patch</span>
+                <span class="choice-index">1</span>
+              </div>
+              <h2>Python.py: serpent trace +1</h2>
+              <div class="snippet">
+                <span><span class="kw">def</span> <span class="fn">cast</span>(bugs):</span>
+                <span>  targets = nearest(bugs, limit=<span class="num">6</span>)</span>
+                <span>  trail.<span class="var">curve</span> += <span class="str">"longer"</span></span>
+                <span class="comment"># wider safe coverage</span>
+              </div>
+              <div class="impact">
+                <div class="impact-row">
+                  <span>damage</span>
+                  <div class="meter"><span style="--v: 58%; --c1: var(--teal); --c2: var(--blue)"></span></div>
+                  <span class="teal">+18%</span>
+                </div>
+                <div class="impact-row">
+                  <span>targets</span>
+                  <div class="meter"><span style="--v: 72%; --c1: var(--teal); --c2: var(--green)"></span></div>
+                  <span class="green">+1</span>
+                </div>
+              </div>
+              <button class="choice-button">apply weapon patch</button>
+            </article>
+
+            <article class="choice" style="--accent: var(--yellow)">
+              <div class="choice-head">
+                <span>stat.patch</span>
+                <span class="choice-index">2</span>
+              </div>
+              <h2>Runtime speed boost</h2>
+              <div class="snippet">
+                <span><span class="kw">const</span> <span class="var">runtime</span> = player.stats</span>
+                <span>runtime.moveSpeed += <span class="num">0.14</span></span>
+                <span>runtime.pickupRange += <span class="num">16</span></span>
+                <span class="comment">// faster repositioning</span>
+              </div>
+              <div class="impact">
+                <div class="impact-row">
+                  <span>speed</span>
+                  <div class="meter"><span style="--v: 64%; --c1: var(--yellow); --c2: var(--orange)"></span></div>
+                  <span class="yellow">+14%</span>
+                </div>
+                <div class="impact-row">
+                  <span>pickup</span>
+                  <div class="meter"><span style="--v: 52%; --c1: var(--yellow); --c2: var(--green)"></span></div>
+                  <span class="green">+16</span>
+                </div>
+              </div>
+              <button class="choice-button">apply stat patch</button>
+            </article>
+
+            <article class="choice" style="--accent: var(--green)">
+              <div class="choice-head">
+                <span>support.patch</span>
+                <span class="choice-index">3</span>
+              </div>
+              <h2>Emergency green cross</h2>
+              <div class="snippet">
+                <span><span class="kw">if</span> player.hp &lt; <span class="num">70</span>:</span>
+                <span>  heal(<span class="num">24</span>)</span>
+                <span>  shield.duration = <span class="num">3.0</span></span>
+                <span class="comment"># recover before boss trace</span>
+              </div>
+              <div class="impact">
+                <div class="impact-row">
+                  <span>heal</span>
+                  <div class="meter"><span style="--v: 60%; --c1: var(--green); --c2: var(--teal)"></span></div>
+                  <span class="green">+24</span>
+                </div>
+                <div class="impact-row">
+                  <span>shield</span>
+                  <div class="meter"><span style="--v: 48%; --c1: var(--green); --c2: var(--blue)"></span></div>
+                  <span class="blue">3s</span>
+                </div>
+              </div>
+              <button class="choice-button">apply support patch</button>
+            </article>
+          </section>
+
+          <footer class="modal-foot">
+            <div class="commit">
+              <span class="label">Apply Animation</span>
+              <code>$ git commit -m "upgrade: Python serpent trace"</code>
+            </div>
+            <div class="apply-progress">
+              <div class="label">patch.apply()</div>
+              <div class="meter"><span style="--v: 18%; --c1: var(--teal); --c2: var(--yellow)"></span></div>
+            </div>
+          </footer>
+        </section>
+      </section>
+
+      <footer class="statusbar">
+        <span>05_level_up_upgrade_modal_frontend_design.html</span>
+        <span>Lv.04 quick fix open · combat paused</span>
+        <span>UTF-8</span>
+        <span>JDS</span>
+      </footer>
+    </section>
+
+    <div class="hint">
+      DESIGN.md + frontend-design version: autocomplete-like upgrade modal, paused combat context, three stable choices, desktop/mobile screenshot verified.
+    </div>
+  </main>
+</body>
+</html>

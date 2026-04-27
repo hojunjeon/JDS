@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JDS 02 Stage Select - Frontend Design</title>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --sidebar: #252526;
+      --status: #007acc;
+      --white: #d4d4d4;
+      --dim: #858585;
+      --teal: #4ec9b0;
+      --blue: #9cdcfe;
+      --green: #b5cea8;
+      --yellow: #dcdcaa;
+      --orange: #ce9178;
+      --red: #f44747;
+      --comment: #6a9955;
+      --line: #3c3c3c;
+      --ink: #151515;
+      --panel: #202020;
+      --panel2: #191919;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        radial-gradient(circle at 72% 16%, rgba(78, 201, 176, 0.08), transparent 340px),
+        radial-gradient(circle at 18% 84%, rgba(0, 122, 204, 0.08), transparent 300px),
+        var(--bg);
+      background-size: 100% 4px, 64px 64px, auto, auto, auto;
+      color: var(--white);
+      font-family: "JetBrains Mono", "Space Mono", "Noto Sans KR", Consolas, monospace;
+    }
+
+    .screen {
+      min-height: 100vh;
+      padding: 26px;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 14px;
+    }
+
+    .shell {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: rgba(30, 30, 30, 0.96);
+      box-shadow:
+        0 0 0 1px rgba(78, 201, 176, 0.04),
+        0 0 34px rgba(78, 201, 176, 0.12);
+      display: grid;
+      grid-template-rows: 34px minmax(0, 1fr) 28px;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .shell::before {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: 34px 0 28px;
+      background:
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.026) 1px, transparent 1px, transparent 4px),
+        linear-gradient(90deg, transparent, rgba(78, 201, 176, 0.035), transparent);
+      opacity: 0.75;
+      z-index: 2;
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--line);
+      color: var(--dim);
+      font-size: 12px;
+      min-width: 0;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #28c840; }
+
+    .window-title {
+      color: var(--white);
+      margin-left: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .layout {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 238px minmax(0, 1fr) 316px;
+    }
+
+    .rail,
+    .brief {
+      min-width: 0;
+      background: var(--sidebar);
+      padding: 16px;
+      display: grid;
+      align-content: start;
+      gap: 16px;
+      z-index: 3;
+    }
+
+    .rail {
+      border-right: 1px solid var(--line);
+    }
+
+    .brief {
+      border-left: 1px solid var(--line);
+    }
+
+    .label {
+      color: var(--dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .tree {
+      display: grid;
+      gap: 3px;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .tree-row {
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      color: var(--dim);
+      border-left: 2px solid transparent;
+      background: transparent;
+    }
+
+    .tree-row.active {
+      color: var(--white);
+      border-left-color: var(--teal);
+      background: rgba(78, 201, 176, 0.08);
+    }
+
+    .tree-row.locked {
+      opacity: 0.46;
+    }
+
+    .mini-log {
+      border: 1px solid rgba(212, 212, 212, 0.1);
+      background: var(--panel2);
+      padding: 11px;
+      display: grid;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--dim);
+      min-height: 120px;
+    }
+
+    .mini-log span.ok { color: var(--green); }
+    .mini-log span.warn { color: var(--yellow); }
+    .mini-log span.path { color: var(--blue); }
+
+    .workspace {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 36px minmax(0, 1fr);
+      background: var(--bg);
+      z-index: 3;
+    }
+
+    .tabs {
+      min-width: 0;
+      display: flex;
+      background: #181818;
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .tab {
+      height: 36px;
+      min-width: 142px;
+      padding: 0 13px;
+      display: flex;
+      align-items: center;
+      color: var(--dim);
+      border-right: 1px solid var(--line);
+      font-size: 12px;
+    }
+
+    .tab.active {
+      color: var(--white);
+      background: var(--bg);
+      border-top: 2px solid var(--teal);
+    }
+
+    .canvas {
+      min-height: 0;
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 18px;
+      overflow: hidden;
+    }
+
+    .head {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 310px);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .eyebrow {
+      color: var(--comment);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--white);
+      font-size: clamp(30px, 4.8vw, 62px);
+      line-height: 0.94;
+      letter-spacing: 0;
+      text-shadow: 0 0 18px rgba(78, 201, 176, 0.11);
+    }
+
+    .summary {
+      max-width: 760px;
+      margin-top: 12px;
+      color: var(--dim);
+      font-size: 14px;
+      line-height: 1.62;
+    }
+
+    .command {
+      border: 1px solid rgba(78, 201, 176, 0.28);
+      border-left: 3px solid var(--teal);
+      background:
+        linear-gradient(90deg, rgba(78, 201, 176, 0.09), rgba(78, 201, 176, 0.025)),
+        var(--panel2);
+      padding: 12px;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      font-size: 12px;
+      min-width: 0;
+    }
+
+    .command code {
+      color: var(--white);
+      font: inherit;
+      overflow-wrap: anywhere;
+    }
+
+    .command .user { color: var(--teal); }
+    .command .path { color: var(--blue); }
+    .command .cmd { color: var(--yellow); }
+
+    .pipeline {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .ruler {
+      position: relative;
+      border: 1px solid rgba(212, 212, 212, 0.08);
+      background:
+        linear-gradient(to bottom, transparent 0 33px, rgba(78, 201, 176, 0.22) 33px 34px, transparent 34px 67px),
+        var(--panel2);
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      color: var(--dim);
+      font-size: 11px;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .ruler div {
+      display: grid;
+      place-items: center;
+    }
+
+    .stage-list {
+      min-height: 0;
+      overflow: auto;
+      padding-right: 4px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .stage {
+      min-height: 108px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(78, 201, 176, 0.04), transparent 36%),
+        var(--panel);
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr) minmax(150px, 190px);
+      gap: 14px;
+      align-items: stretch;
+      padding: 12px;
+      position: relative;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      bottom: -1px;
+      width: 4px;
+      background: var(--dim);
+      opacity: 0.55;
+    }
+
+    .stage.active {
+      border-color: rgba(78, 201, 176, 0.76);
+      box-shadow: 0 0 20px rgba(78, 201, 176, 0.11);
+    }
+
+    .stage.active::before {
+      background: var(--teal);
+      opacity: 1;
+    }
+
+    .stage.locked {
+      opacity: 0.56;
+      filter: saturate(0.7);
+    }
+
+    .stage-id {
+      display: grid;
+      align-content: space-between;
+      border-right: 1px solid rgba(212, 212, 212, 0.08);
+      padding-right: 12px;
+      min-width: 0;
+    }
+
+    .stage-id strong {
+      color: var(--white);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .stage-id span {
+      color: var(--dim);
+      font-size: 11px;
+    }
+
+    .stage-main {
+      min-width: 0;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .stage-main h2 {
+      margin: 0;
+      color: var(--white);
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    .stage-main p {
+      margin: 0;
+      color: var(--dim);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      border: 1px solid rgba(212, 212, 212, 0.12);
+      background: rgba(255, 255, 255, 0.024);
+      color: var(--dim);
+      padding: 4px 7px;
+      font-size: 11px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .tag.red { color: var(--red); border-color: rgba(244, 71, 71, 0.3); }
+    .tag.yellow { color: var(--yellow); border-color: rgba(220, 220, 170, 0.28); }
+    .tag.blue { color: var(--blue); border-color: rgba(156, 220, 254, 0.28); }
+    .tag.green { color: var(--green); border-color: rgba(181, 206, 168, 0.28); }
+    .tag.orange { color: var(--orange); border-color: rgba(206, 145, 120, 0.28); }
+
+    .stage-state {
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      font-size: 12px;
+      min-width: 0;
+    }
+
+    .meter {
+      height: 8px;
+      border: 1px solid rgba(212, 212, 212, 0.16);
+      background: #111;
+      overflow: hidden;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: var(--value);
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+    }
+
+    .stage-state b {
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .briefing {
+      border: 1px solid rgba(78, 201, 176, 0.3);
+      background:
+        linear-gradient(135deg, rgba(78, 201, 176, 0.07), transparent 56%),
+        var(--panel2);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .briefing strong {
+      color: var(--teal);
+    }
+
+    .kv {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid rgba(212, 212, 212, 0.08);
+      padding-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .kv span:first-child { color: var(--dim); }
+    .kv span:last-child { color: var(--white); text-align: right; }
+
+    .event-list {
+      display: grid;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--dim);
+    }
+
+    .event {
+      border-left: 2px solid rgba(212, 212, 212, 0.22);
+      padding-left: 9px;
+      line-height: 1.4;
+    }
+
+    .event.warn { border-left-color: var(--yellow); }
+    .event.err { border-left-color: var(--red); }
+    .event.boss { border-left-color: var(--teal); }
+
+    .event b {
+      color: var(--white);
+      display: block;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    button {
+      width: 100%;
+      border: 1px solid var(--teal);
+      background: rgba(78, 201, 176, 0.1);
+      color: var(--teal);
+      font: inherit;
+      font-size: 13px;
+      padding: 11px 12px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 0;
+    }
+
+    button.primary {
+      background: var(--teal);
+      color: #0f1f1d;
+      font-weight: 700;
+    }
+
+    button:hover {
+      outline: 1px solid rgba(78, 201, 176, 0.55);
+      box-shadow: 0 0 16px rgba(78, 201, 176, 0.14);
+    }
+
+    .statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 12px;
+      background: var(--status);
+      color: #fff;
+      font-size: 12px;
+      z-index: 4;
+      min-width: 0;
+    }
+
+    .hint {
+      color: var(--dim);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1120px) {
+      body {
+        overflow: auto;
+      }
+
+      .layout {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+
+      .brief {
+        grid-column: 1 / -1;
+        border-left: 0;
+        border-top: 1px solid var(--line);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        align-items: start;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .screen {
+        padding: 12px;
+      }
+
+      .layout,
+      .head,
+      .pipeline,
+      .brief {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .stage {
+        grid-template-columns: 1fr;
+      }
+
+      .stage-id {
+        border-right: 0;
+        border-bottom: 1px solid rgba(212, 212, 212, 0.08);
+        padding-right: 0;
+        padding-bottom: 10px;
+      }
+
+      .ruler {
+        display: none;
+      }
+
+      .canvas {
+        padding: 16px;
+      }
+
+      .statusbar {
+        min-height: 28px;
+        flex-wrap: wrap;
+        padding: 6px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="JDS screen 02 stage select using frontend-design and DESIGN.md">
+    <section class="shell">
+      <header class="titlebar">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="window-title">jiyoon@ssafy: ~/debug-survival/stage-pipeline.config</span>
+      </header>
+
+      <div class="layout">
+        <aside class="rail" aria-label="stage explorer">
+          <div class="label">Explorer</div>
+          <div class="tree">
+            <div class="tree-row active">▾ curriculum</div>
+            <div class="tree-row active">  stage_01.python</div>
+            <div class="tree-row locked">  stage_02.algorithm</div>
+            <div class="tree-row locked">  stage_03.web</div>
+            <div class="tree-row locked">  stage_04.graph</div>
+            <div class="tree-row locked">  stage_05.ai</div>
+            <div class="tree-row locked">  stage_06.deploy</div>
+          </div>
+
+          <div class="label">Session Log</div>
+          <div class="mini-log">
+            <div><span class="ok">OK</span> boot screen accepted</div>
+            <div><span class="path">NEXT</span> curriculum route open</div>
+            <div><span class="warn">WARN</span> stage_01 has 24 bugs</div>
+            <div><span class="path">CMD</span> select stage before weapon</div>
+          </div>
+        </aside>
+
+        <section class="workspace">
+          <nav class="tabs" aria-label="editor tabs">
+            <div class="tab active">stage-pipeline.config</div>
+            <div class="tab">quest.queue</div>
+            <div class="tab">boss.trace</div>
+          </nav>
+
+          <div class="canvas">
+            <header class="head">
+              <div>
+                <div class="eyebrow">// SSAFY curriculum is compiled as survival stages</div>
+                <h1>Stage Pipeline</h1>
+                <div class="summary">
+                  지윤의 학습 흐름을 실행 가능한 디버그 파이프라인으로 선택합니다.
+                  각 스테이지는 다른 개발 압박, 다른 오류 패턴, 다른 보스 변형을 엽니다.
+                </div>
+              </div>
+
+              <div class="command">
+                <code><span class="user">jiyoon@ssafy</span>:<span class="path">~/curriculum</span>$</code>
+                <code><span class="cmd">run</span> stage_01 --mode survival</code>
+              </div>
+            </header>
+
+            <section class="pipeline" aria-label="stage pipeline">
+              <div class="ruler" aria-hidden="true">
+                <div>01</div>
+                <div>02</div>
+                <div>03</div>
+                <div>04</div>
+                <div>05</div>
+                <div>06</div>
+              </div>
+
+              <div class="stage-list">
+                <article class="stage active">
+                  <div class="stage-id">
+                    <strong>01</strong>
+                    <span>READY</span>
+                  </div>
+                  <div class="stage-main">
+                    <h2>Python Basics</h2>
+                    <p>SSAFY 교실 터미널에서 기본 문법 오류와 첫 이벤트 웨이브를 처리합니다.</p>
+                    <div class="tags">
+                      <span class="tag red">SyntaxError</span>
+                      <span class="tag blue">NullPointer</span>
+                      <span class="tag yellow">IndentationError</span>
+                      <span class="tag green">starter</span>
+                    </div>
+                  </div>
+                  <div class="stage-state">
+                    <b>selected</b>
+                    <div class="meter" aria-label="stage readiness"><span style="--value: 100%"></span></div>
+                    <span>weapon select unlocked</span>
+                  </div>
+                </article>
+
+                <article class="stage locked">
+                  <div class="stage-id">
+                    <strong>02</strong>
+                    <span>LOCKED</span>
+                  </div>
+                  <div class="stage-main">
+                    <h2>Algorithm Basics</h2>
+                    <p>온라인 저지 환경에서 시간 제한, 입력 실수, 빠른 추격형 오류가 압박합니다.</p>
+                    <div class="tags">
+                      <span class="tag red">TimeLimitError</span>
+                      <span class="tag blue">NullPointer</span>
+                      <span class="tag green">judge</span>
+                    </div>
+                  </div>
+                  <div class="stage-state">
+                    <b style="color: var(--dim)">requires clear</b>
+                    <div class="meter"><span style="--value: 0%"></span></div>
+                    <span>stage_01 pending</span>
+                  </div>
+                </article>
+
+                <article class="stage locked">
+                  <div class="stage-id">
+                    <strong>03</strong>
+                    <span>LOCKED</span>
+                  </div>
+                  <div class="stage-main">
+                    <h2>Web</h2>
+                    <p>브라우저 개발자 도구에서 레이아웃 붕괴와 CSS 우선순위 전쟁이 시작됩니다.</p>
+                    <div class="tags">
+                      <span class="tag blue">LayoutBug</span>
+                      <span class="tag yellow">Specificity</span>
+                      <span class="tag orange">DOM</span>
+                    </div>
+                  </div>
+                  <div class="stage-state">
+                    <b style="color: var(--dim)">requires clear</b>
+                    <div class="meter"><span style="--value: 0%"></span></div>
+                    <span>algorithm pending</span>
+                  </div>
+                </article>
+
+                <article class="stage locked">
+                  <div class="stage-id">
+                    <strong>04</strong>
+                    <span>LOCKED</span>
+                  </div>
+                  <div class="stage-main">
+                    <h2>Advanced Algorithm</h2>
+                    <p>그래프 디버거 안에서 교착 상태와 세그폴트가 느리지만 치명적으로 접근합니다.</p>
+                    <div class="tags">
+                      <span class="tag orange">Deadlock</span>
+                      <span class="tag red">SegFault</span>
+                      <span class="tag blue">Graph</span>
+                    </div>
+                  </div>
+                  <div class="stage-state">
+                    <b style="color: var(--dim)">requires clear</b>
+                    <div class="meter"><span style="--value: 0%"></span></div>
+                    <span>web pending</span>
+                  </div>
+                </article>
+
+                <article class="stage locked">
+                  <div class="stage-id">
+                    <strong>05</strong>
+                    <span>LOCKED</span>
+                  </div>
+                  <div class="stage-main">
+                    <h2>AI</h2>
+                    <p>모델 평가 콘솔에서 환각, 검증 손실, 불안정한 결과 로그를 견뎌야 합니다.</p>
+                    <div class="tags">
+                      <span class="tag yellow">Hallucination</span>
+                      <span class="tag red">ValidationLoss</span>
+                      <span class="tag green">Eval</span>
+                    </div>
+                  </div>
+                  <div class="stage-state">
+                    <b style="color: var(--dim)">requires clear</b>
+                    <div class="meter"><span style="--value: 0%"></span></div>
+                    <span>graph pending</span>
+                  </div>
+                </article>
+
+                <article class="stage locked">
+                  <div class="stage-id">
+                    <strong>06</strong>
+                    <span>LOCKED</span>
+                  </div>
+                  <div class="stage-main">
+                    <h2>Django Final</h2>
+                    <p>프로덕션 배포 터미널에서 마이그레이션 오류와 최종 보스가 기다립니다.</p>
+                    <div class="tags">
+                      <span class="tag green">MigrationError</span>
+                      <span class="tag red">FinalBoss</span>
+                      <span class="tag blue">Deploy</span>
+                    </div>
+                  </div>
+                  <div class="stage-state">
+                    <b style="color: var(--dim)">requires clear</b>
+                    <div class="meter"><span style="--value: 0%"></span></div>
+                    <span>AI pending</span>
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <aside class="brief" aria-label="selected stage briefing">
+          <div class="label">Selected Stage</div>
+          <div class="briefing">
+            <strong>Stage 1 Briefing</strong>
+            Python 과제 제출 전, 교실 터미널에 버그 웨이브가 감지되었습니다. 첫 목표는 24개의 기본 오류를 정리하고 IDE 부팅 실패 이벤트를 버티는 것입니다.
+          </div>
+
+          <div class="label">Stage Config</div>
+          <div>
+            <div class="kv"><span>theme</span><span>SSAFY classroom</span></div>
+            <div class="kv"><span>boss</span><span>Jang Seonhyeong</span></div>
+            <div class="kv"><span>quest</span><span>fix 24 bugs</span></div>
+            <div class="kv"><span>reward</span><span>weapon unlock</span></div>
+          </div>
+
+          <div class="label">Event Queue</div>
+          <div class="event-list">
+            <div class="event warn"><b>T+25 Indentation Panic</b> 탭과 스페이스가 섞인 오류 웨이브</div>
+            <div class="event err"><b>T+55 IDE Boot Failure</b> PyCharm session keep-alive</div>
+            <div class="event boss"><b>T+92 Boss Spawn</b> boss.spawn("Jang Seonhyeong")</div>
+          </div>
+
+          <div class="actions">
+            <button class="primary">continue to weapon select</button>
+            <button>return to boot screen</button>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="statusbar">
+        <span>02_stage_select_frontend_design.html</span>
+        <span>stage_01 selected</span>
+        <span>UTF-8</span>
+        <span>JDS</span>
+      </footer>
+    </section>
+
+    <div class="hint">
+      DESIGN.md + frontend-design version: industrial IDE pipeline, dense but readable stage flow, code-themed progression, compact tool UI.
+    </div>
+  </main>
+</body>
+</html>

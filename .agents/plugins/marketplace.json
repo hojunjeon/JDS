@@ -1,7 +1,7 @@
 {
-  "name": "jdy-local-marketplace",
+  "name": "jds-local-marketplace",
   "interface": {
-    "displayName": "JDY Local Plugins"
+    "displayName": "JDS Local Plugins"
   },
   "plugins": [
     {

@@ -1,0 +1,4 @@
+interface:
+  display_name: "JDS Git Sync"
+  short_description: "Commit and push JDS changes safely."
+  default_prompt: "Use the JDS Git sync rules for commit and push decisions."

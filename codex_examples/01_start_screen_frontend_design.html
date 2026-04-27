@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JDS 01 Start Screen - Frontend Design</title>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --sidebar: #252526;
+      --status: #007acc;
+      --white: #d4d4d4;
+      --dim: #858585;
+      --teal: #4ec9b0;
+      --blue: #9cdcfe;
+      --green: #b5cea8;
+      --yellow: #dcdcaa;
+      --orange: #ce9178;
+      --red: #f44747;
+      --comment: #6a9955;
+      --line: #3c3c3c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--white);
+      font-family: "JetBrains Mono", "Space Mono", "Noto Sans KR", Consolas, monospace;
+      background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.026) 1px, transparent 1px, transparent 4px),
+        radial-gradient(circle at 72% 30%, rgba(244, 71, 71, 0.09), transparent 300px),
+        radial-gradient(circle at 32% 66%, rgba(78, 201, 176, 0.14), transparent 430px),
+        linear-gradient(90deg, rgba(0, 122, 204, 0.06), transparent 35%, rgba(78, 201, 176, 0.045)),
+        var(--bg);
+    }
+
+    .screen {
+      min-height: 100vh;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .terminal {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: rgba(30, 30, 30, 0.97);
+      display: grid;
+      grid-template-rows: 34px minmax(0, 1fr) 28px;
+      box-shadow: 0 0 42px rgba(78, 201, 176, 0.14);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .terminal::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: 34px 0 28px;
+      opacity: 0.22;
+      background: linear-gradient(115deg, transparent 0 46%, rgba(78, 201, 176, 0.08) 47%, transparent 49% 100%);
+    }
+
+    .titlebar,
+    .statusbar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+
+    .titlebar {
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--line);
+      color: var(--dim);
+    }
+
+    .statusbar {
+      justify-content: space-between;
+      background: var(--status);
+      color: #fff;
+      z-index: 4;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #28c840; }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr) 330px;
+      background:
+        linear-gradient(rgba(156, 220, 254, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(156, 220, 254, 0.03) 1px, transparent 1px),
+        #151515;
+      background-size: 36px 36px;
+    }
+
+    .explorer,
+    .briefing {
+      min-width: 0;
+      background: rgba(37, 37, 38, 0.94);
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 12px;
+    }
+
+    .explorer {
+      border-right: 1px solid var(--line);
+    }
+
+    .briefing {
+      border-left: 1px solid var(--line);
+    }
+
+    .label {
+      color: var(--dim);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .tree {
+      display: grid;
+      align-content: start;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .file {
+      padding: 9px 10px;
+      border-left: 3px solid transparent;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--dim);
+      display: grid;
+      gap: 3px;
+    }
+
+    .file.active {
+      border-left-color: var(--teal);
+      background: rgba(78, 201, 176, 0.08);
+      color: var(--white);
+    }
+
+    .file b {
+      color: var(--white);
+    }
+
+    .session-card {
+      border: 1px solid rgba(78, 201, 176, 0.3);
+      background: rgba(78, 201, 176, 0.06);
+      padding: 10px;
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+    }
+
+    .center {
+      min-width: 0;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 14px;
+    }
+
+    .hero {
+      border: 1px solid rgba(78, 201, 176, 0.42);
+      border-left: 5px solid var(--teal);
+      background:
+        linear-gradient(135deg, rgba(78, 201, 176, 0.14), transparent 42%),
+        linear-gradient(315deg, rgba(244, 71, 71, 0.08), transparent 34%),
+        rgba(24, 24, 24, 0.95);
+      padding: 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      color: var(--comment);
+      font-size: 12px;
+      margin-bottom: 9px;
+    }
+
+    .logo {
+      margin: 0;
+      font-size: clamp(52px, 8vw, 108px);
+      line-height: 0.84;
+      letter-spacing: 0;
+      color: var(--white);
+      text-shadow:
+        4px 0 rgba(78, 201, 176, 0.45),
+        -3px 0 rgba(244, 71, 71, 0.28),
+        0 0 30px rgba(78, 201, 176, 0.14);
+    }
+
+    .subtitle {
+      max-width: 690px;
+      color: var(--dim);
+      font-size: 15px;
+      line-height: 1.55;
+      margin-top: 12px;
+    }
+
+    .boot-chip {
+      min-height: 130px;
+      border: 1px solid rgba(212, 212, 212, 0.14);
+      background: rgba(8, 8, 8, 0.6);
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .boot-chip strong {
+      display: block;
+      color: var(--teal);
+      font-size: 48px;
+      line-height: 1;
+    }
+
+    .console-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+    }
+
+    .panel {
+      min-width: 0;
+      border: 1px solid rgba(212, 212, 212, 0.13);
+      background: rgba(24, 24, 24, 0.91);
+      padding: 14px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .log {
+      display: grid;
+      gap: 8px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .line {
+      display: grid;
+      grid-template-columns: 74px 52px minmax(0, 1fr);
+      gap: 8px;
+      color: var(--dim);
+    }
+
+    .terminal-call {
+      border: 1px solid rgba(212, 212, 212, 0.12);
+      background: rgba(8, 8, 8, 0.64);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      margin-left: 4px;
+      background: var(--teal);
+      vertical-align: -2px;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 190px 190px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .button {
+      min-height: 42px;
+      border: 1px solid rgba(78, 201, 176, 0.5);
+      background: rgba(78, 201, 176, 0.12);
+      color: var(--teal);
+      font: inherit;
+      border-radius: 0;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .button.primary {
+      background: var(--teal);
+      color: #101010;
+      font-weight: 700;
+    }
+
+    .stat-list {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .stat {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(212, 212, 212, 0.08);
+    }
+
+    .quest {
+      border: 1px solid rgba(220, 220, 170, 0.32);
+      background: rgba(220, 220, 170, 0.06);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .teal { color: var(--teal); }
+    .blue { color: var(--blue); }
+    .green { color: var(--green); }
+    .yellow { color: var(--yellow); }
+    .orange { color: var(--orange); }
+    .red { color: var(--red); }
+    .dim { color: var(--dim); }
+    .comment { color: var(--comment); }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="JDS screen 01 start boot screen using frontend-design">
+    <section class="terminal">
+      <header class="titlebar">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span>jiyoon@ssafy: ~/debug-survival/start.frontend-design</span>
+      </header>
+
+      <section class="workspace">
+        <aside class="explorer">
+          <div>
+            <div class="label">Explorer</div>
+            <h3>debug-survival</h3>
+          </div>
+          <div class="tree">
+            <div class="file active"><b>start.sh</b><span>boot entrypoint</span></div>
+            <div class="file"><b>stage_01/</b><span>Python Basics</span></div>
+            <div class="file"><b>weapons/</b><span>Python.py, C_Cpp.c, Java.class</span></div>
+            <div class="file"><b>errors/</b><span>24 unresolved bugs</span></div>
+            <div class="file"><b>boss.trace</b><span>locked until 05:00</span></div>
+          </div>
+          <div class="session-card">
+            <span class="label">Session Status</span>
+            <b class="yellow">debug pressure rising</b>
+            <span class="dim">Stage 1 starts from the SSAFY classroom terminal.</span>
+          </div>
+        </aside>
+
+        <main class="center">
+          <header class="hero">
+            <div>
+              <div class="eyebrow">// SSAFY boot sequence initialized</div>
+              <h1 class="logo">JDS<br>SURVIVAL</h1>
+              <p class="subtitle">
+                Enter the classroom terminal, clean up runaway errors, and keep the study session alive until the first boss trace appears.
+              </p>
+            </div>
+            <div class="boot-chip">
+              <div>
+                <span class="label">Boot</span>
+                <strong>01</strong>
+                <span class="green">ready</span>
+              </div>
+            </div>
+          </header>
+
+          <section class="console-grid">
+            <article class="panel">
+              <span class="label">Boot Log</span>
+              <div class="log">
+                <div class="line"><span>[09:00:01]</span><b class="green">OK</b><span>loaded <span class="blue">Python Basics</span></span></div>
+                <div class="line"><span>[09:00:02]</span><b class="green">OK</b><span>mounted <span class="orange">SSAFY classroom</span></span></div>
+                <div class="line"><span>[09:00:03]</span><b class="yellow">WARN</b><span>24 unresolved bugs detected</span></div>
+                <div class="line"><span>[09:00:04]</span><b class="red">ERR</b><span>IndentationError wave scheduled at T+25s</span></div>
+                <div class="line"><span>[09:00:05]</span><b class="green">OK</b><span>starter weapon files indexed</span></div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <span class="label">Command Preview</span>
+              <div class="terminal-call">
+                <span><span class="teal">jiyoon@ssafy</span>:<span class="blue">~/stage1</span>$</span>
+                <span><span class="yellow">npm run survive</span><span class="cursor"></span></span>
+                <span class="comment"># opens weapon select after boot checks</span>
+              </div>
+            </article>
+          </section>
+
+          <footer class="actions">
+            <div class="terminal-call">
+              <span><span class="teal">$</span> session.prepare(<span class="orange">"stage_01"</span>)</span>
+            </div>
+            <button class="button">weapon files</button>
+            <button class="button primary">start debug</button>
+          </footer>
+        </main>
+
+        <aside class="briefing">
+          <div>
+            <div class="label">Mission Briefing</div>
+            <h2>Stage 1</h2>
+          </div>
+          <div class="stat-list">
+            <div class="stat"><span>Curriculum</span><b>Python Basics</b></div>
+            <div class="stat"><span>Location</span><b>SSAFY lab</b></div>
+            <div class="stat"><span>First wave</span><b class="orange">IndentationError</b></div>
+            <div class="stat"><span>Boss</span><b class="red">Jang Seonhyeong</b></div>
+            <div class="stat"><span>Goal</span><b class="green">survive 05:00</b></div>
+          </div>
+          <div class="quest">
+            <span class="label">Today&apos;s Quest</span>
+            <b class="yellow">Fix 24 bugs and commit the first stable build.</b>
+            <span class="dim">Rewards unlock weapon select and the first codex entries.</span>
+          </div>
+        </aside>
+      </section>
+
+      <footer class="statusbar">
+        <span>01_start_screen_frontend_design.html</span>
+        <span>Stage 1 boot ready</span>
+        <span>UTF-8</span>
+        <span>JDS</span>
+      </footer>
+    </section>
+
+    <div class="dim">frontend-design comparison version: stronger IDE layout, boot hero, explorer context, mission briefing, and command-first action path.</div>
+  </main>
+</body>
+</html>

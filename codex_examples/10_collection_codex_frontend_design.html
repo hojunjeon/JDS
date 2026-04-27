@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JDS 10 Collection Codex - Frontend Design</title>
+  <style>
+    :root {
+      --bg:#1e1e1e; --sidebar:#252526; --status:#007acc; --white:#d4d4d4; --dim:#858585;
+      --teal:#4ec9b0; --blue:#9cdcfe; --green:#b5cea8; --yellow:#dcdcaa; --orange:#ce9178; --red:#f44747;
+      --comment:#6a9955; --line:#3c3c3c;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; overflow:hidden; color:var(--white);
+      font-family:"JetBrains Mono","Space Mono","Noto Sans KR",Consolas,monospace;
+      background:
+        repeating-linear-gradient(0deg,rgba(255,255,255,.025),rgba(255,255,255,.025) 1px,transparent 1px,transparent 4px),
+        radial-gradient(circle at 75% 28%,rgba(156,220,254,.1),transparent 360px),
+        radial-gradient(circle at 32% 72%,rgba(78,201,176,.11),transparent 410px),
+        var(--bg);
+    }
+    .screen { min-height:100vh; padding:18px; display:grid; grid-template-rows:minmax(0,1fr) auto; gap:10px; }
+    .terminal { min-height:0; border:1px solid var(--line); background:rgba(30,30,30,.98); display:grid; grid-template-rows:34px minmax(0,1fr) 28px; box-shadow:0 0 36px rgba(78,201,176,.12); }
+    .titlebar,.statusbar { display:flex; align-items:center; gap:10px; padding:0 12px; font-size:12px; min-width:0; }
+    .titlebar { background:var(--sidebar); border-bottom:1px solid var(--line); color:var(--dim); }
+    .statusbar { justify-content:space-between; background:var(--status); color:#fff; }
+    .dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; }
+    .dot.red{background:#ff5f57}.dot.yellow{background:#ffbd2e}.dot.green{background:#28c840}
+    .ide { min-height:0; display:grid; grid-template-columns:270px minmax(0,1fr) 340px; overflow:hidden; background:#151515; }
+    .explorer,.inspector { background:rgba(37,37,38,.94); padding:14px; min-width:0; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:12px; }
+    .explorer { border-right:1px solid var(--line); }
+    .inspector { border-left:1px solid var(--line); }
+    .label { color:var(--dim); font-size:11px; text-transform:uppercase; }
+    h1,h2,h3 { margin:0; letter-spacing:0; }
+    .tree,.list { display:grid; align-content:start; gap:8px; font-size:12px; }
+    .item { padding:9px 10px; border-left:3px solid transparent; background:rgba(255,255,255,.02); color:var(--dim); display:grid; gap:3px; }
+    .item.active { border-left-color:var(--teal); background:rgba(78,201,176,.08); color:var(--white); }
+    .item b { color:var(--white); }
+    .progressbox { border:1px solid rgba(78,201,176,.3); background:rgba(78,201,176,.06); padding:10px; display:grid; gap:7px; }
+    .meter { height:8px; border:1px solid rgba(212,212,212,.17); background:#111; overflow:hidden; }
+    .meter span { display:block; height:100%; width:var(--v); background:linear-gradient(90deg,var(--c1),var(--c2)); }
+    .editor { min-width:0; padding:16px; display:grid; grid-template-rows:auto minmax(0,1fr); gap:14px; background:
+      linear-gradient(rgba(156,220,254,.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(156,220,254,.03) 1px,transparent 1px),
+      #151515; background-size:36px 36px; }
+    .tabs { display:flex; gap:8px; min-width:0; }
+    .tab { border:1px solid rgba(212,212,212,.12); background:rgba(24,24,24,.9); padding:9px 12px; font-size:12px; color:var(--dim); }
+    .tab.active { color:var(--teal); border-top:3px solid var(--teal); padding-top:7px; background:rgba(30,30,30,.96); }
+    .codex { min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 1fr; gap:12px; }
+    .hero { grid-column:1/-1; border:1px solid rgba(78,201,176,.38); border-left:5px solid var(--teal); background:linear-gradient(135deg,rgba(78,201,176,.12),transparent 42%),rgba(24,24,24,.95); padding:16px; display:grid; grid-template-columns:minmax(0,1fr) 170px; gap:18px; align-items:center; }
+    .hero h1 { font-size:clamp(36px,5vw,64px); line-height:.94; }
+    .completion { border:1px solid rgba(78,201,176,.32); background:rgba(8,8,8,.58); padding:12px; display:grid; place-items:center; text-align:center; min-height:104px; }
+    .completion strong { color:var(--teal); font-size:44px; line-height:1; }
+    .panel { border:1px solid rgba(212,212,212,.13); background:rgba(24,24,24,.92); padding:14px; min-width:0; display:grid; align-content:start; gap:12px; }
+    .card { border:1px solid rgba(212,212,212,.11); background:rgba(255,255,255,.025); padding:10px; display:grid; gap:6px; font-size:12px; }
+    .card.active { border-color:rgba(78,201,176,.42); background:rgba(78,201,176,.07); }
+    .snippet { border:1px solid rgba(212,212,212,.12); background:rgba(8,8,8,.64); padding:12px; display:grid; gap:7px; font-size:12px; line-height:1.45; }
+    .stat { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; font-size:12px; padding:8px 0; border-bottom:1px solid rgba(212,212,212,.08); }
+    .stat:last-child { border-bottom:0; }
+    .btn { min-height:38px; border:1px solid rgba(78,201,176,.46); background:rgba(78,201,176,.12); color:var(--teal); font:inherit; border-radius:0; }
+    .teal{color:var(--teal)}.blue{color:var(--blue)}.green{color:var(--green)}.yellow{color:var(--yellow)}.orange{color:var(--orange)}.red{color:var(--red)}.dim{color:var(--dim)}.comment{color:var(--comment)}
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="JDS screen 10 collection codex">
+    <section class="terminal">
+      <header class="titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span>jiyoon@ssafy: ~/debug-survival/codex</span></header>
+      <section class="ide">
+        <aside class="explorer">
+          <div><div class="label">Codex Explorer</div><h3>collections</h3></div>
+          <div class="tree">
+            <div class="item active"><b>weapons/</b><span>6 of 8 files indexed</span></div>
+            <div class="item"><b>monsters/</b><span>8 of 11 errors logged</span></div>
+            <div class="item"><b>boss_logs/</b><span>1 trace recovered</span></div>
+            <div class="item"><b>stage_notes/</b><span>Python Basics cleared</span></div>
+            <div class="item"><b>run_history/</b><span>14 sessions archived</span></div>
+          </div>
+          <div class="progressbox">
+            <span class="label">Total Completion</span>
+            <div class="meter"><span style="--v:64%;--c1:var(--teal);--c2:var(--green)"></span></div>
+            <b>64%</b>
+          </div>
+        </aside>
+        <main class="editor">
+          <nav class="tabs" aria-label="codex tabs">
+            <div class="tab active">Python.py</div>
+            <div class="tab">IndentationError.md</div>
+            <div class="tab">boss.trace</div>
+          </nav>
+          <section class="codex">
+            <header class="hero">
+              <div>
+                <div class="label teal">// collection / learning log</div>
+                <h1>Debug<br>Codex</h1>
+                <p class="dim">A compact archive of weapons, monster behaviors, stage notes, and boss traces discovered through repeated runs.</p>
+              </div>
+              <div class="completion"><div><span class="label">Indexed</span><strong>64%</strong></div></div>
+            </header>
+            <article class="panel">
+              <span class="label">Weapon Files</span>
+              <div class="card active"><b class="teal">Python.py</b><span>serpent trail, homing, safe coverage</span></div>
+              <div class="card"><b class="yellow">Java.class</b><span>VM shield orbit learned</span></div>
+              <div class="card"><b class="orange">Git.sh</b><span>unlocked after stage clear</span></div>
+              <div class="card"><b class="blue">SQL.sql</b><span>locked: database crash pattern</span></div>
+            </article>
+            <article class="panel">
+              <span class="label">Monster Entries</span>
+              <div class="card active"><b class="orange">IndentationError</b><span>fires tab arrows, quest target</span></div>
+              <div class="card"><b class="red">SyntaxError</b><span>basic contact pressure</span></div>
+              <div class="card"><b class="yellow">EnvError</b><span>CHARGING then dash burst</span></div>
+              <div class="card"><b class="blue">NullPointer</b><span>fast phased contact</span></div>
+            </article>
+          </section>
+        </main>
+        <aside class="inspector">
+          <div><div class="label">Selected Entry</div><h2 class="teal">Python.py</h2></div>
+          <div class="snippet">
+            <span><span class="blue">class</span> <span class="yellow">PythonTrail</span>:</span>
+            <span>  homing = <span class="green">true</span></span>
+            <span>  curve = <span class="orange">"serpent"</span></span>
+            <span class="comment"># best against scattered bugs</span>
+          </div>
+          <div class="list">
+            <div class="stat"><span>Runs used</span><b>9</b></div>
+            <div class="stat"><span>Total bugs fixed</span><b class="green">642</b></div>
+            <div class="stat"><span>Upgrade level</span><b class="teal">4</b></div>
+            <div class="stat"><span>Best pairing</span><b class="yellow">Java.class</b></div>
+          </div>
+          <button class="btn">pin to next run</button>
+        </aside>
+      </section>
+      <footer class="statusbar"><span>10_collection_codex_frontend_design.html</span><span>collection indexed</span><span>JDS</span></footer>
+    </section>
+    <div class="dim">DESIGN.md + frontend-design version: IDE-style codex for weapons, monsters, boss logs, and learning progress.</div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "JDS Prompt Diary"
+  short_description: "Write JDS prompt diary entries."
+  default_prompt: "Use the JDS prompt diary rules for this development moment."

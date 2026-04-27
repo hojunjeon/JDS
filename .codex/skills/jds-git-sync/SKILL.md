@@ -1,18 +1,18 @@
 ---
-name: jdy-git-sync
-description: Use when committing, pushing, syncing with GitHub, checking remotes, or deciding whether JDY changes should be committed or pushed.
+name: jds-git-sync
+description: Use when committing, pushing, syncing with GitHub, checking remotes, or deciding whether JDS changes should be committed or pushed.
 ---
 
-# JDY Git Sync
+# JDS Git Sync
 
-Use this skill for commit and push decisions in the JDY project.
+Use this skill for commit and push decisions in the JDS project.
 
 ## Repository
 
 Expected remote:
 
 ```text
-https://github.com/hojunjeon/JDY
+https://github.com/hojunjeon/JDS
 ```
 
 ## Commit And Push Gate
@@ -34,7 +34,7 @@ Do not commit or push when the repo is missing, remote is unexpected, verificati
 2. Run `git remote -v`.
 3. Inspect relevant diffs before staging.
 4. Stage only task-related files.
-5. Commit with a concise conventional message, for example `docs: add JDY workflow skills`.
+5. Commit with a concise conventional message, for example `docs: add JDS workflow skills`.
 6. Push only after commit succeeds and branch/remote are clear.
 7. Report commit hash and push result.
 
@@ -42,5 +42,5 @@ If Git is not initialized, explain the blocker and suggest:
 
 ```powershell
 git init
-git remote add origin https://github.com/hojunjeon/JDY
+git remote add origin https://github.com/hojunjeon/JDS
 ```

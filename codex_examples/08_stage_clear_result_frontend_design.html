@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JDS 08 Stage Clear Result - Frontend Design</title>
+  <style>
+    :root {
+      --bg:#1e1e1e; --sidebar:#252526; --status:#007acc; --white:#d4d4d4; --dim:#858585;
+      --teal:#4ec9b0; --blue:#9cdcfe; --green:#b5cea8; --yellow:#dcdcaa; --orange:#ce9178; --red:#f44747;
+      --comment:#6a9955; --line:#3c3c3c;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; overflow:hidden; color:var(--white);
+      font-family:"JetBrains Mono","Space Mono","Noto Sans KR",Consolas,monospace;
+      background:
+        repeating-linear-gradient(0deg,rgba(255,255,255,.025),rgba(255,255,255,.025) 1px,transparent 1px,transparent 4px),
+        radial-gradient(circle at 76% 20%,rgba(181,206,168,.12),transparent 340px),
+        radial-gradient(circle at 30% 64%,rgba(78,201,176,.13),transparent 430px),
+        var(--bg);
+    }
+    .screen { min-height:100vh; padding:18px; display:grid; grid-template-rows:minmax(0,1fr) auto; gap:10px; }
+    .terminal { min-height:0; border:1px solid var(--line); background:rgba(30,30,30,.97); display:grid; grid-template-rows:34px minmax(0,1fr) 28px; box-shadow:0 0 38px rgba(78,201,176,.12); }
+    .titlebar,.statusbar { display:flex; align-items:center; gap:10px; padding:0 12px; font-size:12px; min-width:0; }
+    .titlebar { background:var(--sidebar); border-bottom:1px solid var(--line); color:var(--dim); }
+    .statusbar { background:var(--status); color:#fff; justify-content:space-between; }
+    .dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; }
+    .dot.red{background:#ff5f57}.dot.yellow{background:#ffbd2e}.dot.green{background:#28c840}
+    .workspace {
+      min-height:0; display:grid; grid-template-columns:300px minmax(0,1fr); overflow:hidden;
+      background:
+        linear-gradient(rgba(156,220,254,.045) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(156,220,254,.03) 1px,transparent 1px),
+        #151515; background-size:36px 36px;
+    }
+    .sidebar { border-right:1px solid var(--line); background:rgba(37,37,38,.9); padding:14px; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:14px; }
+    .label { color:var(--dim); font-size:11px; text-transform:uppercase; }
+    .tree { display:grid; align-content:start; gap:8px; font-size:12px; }
+    .file { padding:8px 10px; border-left:3px solid transparent; color:var(--dim); background:rgba(255,255,255,.02); }
+    .file.active { border-left-color:var(--green); color:var(--white); background:rgba(181,206,168,.08); }
+    .badge { border:1px solid rgba(181,206,168,.32); color:var(--green); padding:10px; display:grid; gap:6px; background:rgba(181,206,168,.06); }
+    .main { min-width:0; padding:18px; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:14px; }
+    .hero { border:1px solid rgba(181,206,168,.42); border-left:5px solid var(--green); background:linear-gradient(135deg,rgba(181,206,168,.12),transparent 42%),rgba(24,24,24,.95); padding:18px; display:grid; grid-template-columns:minmax(0,1fr) 210px; gap:18px; align-items:center; }
+    h1 { margin:6px 0 0; font-size:clamp(42px,6vw,78px); line-height:.92; letter-spacing:0; text-shadow:0 0 24px rgba(181,206,168,.16); }
+    .score { min-height:126px; border:1px solid rgba(181,206,168,.35); background:rgba(8,8,8,.55); display:grid; place-items:center; text-align:center; }
+    .score strong { display:block; color:var(--green); font-size:52px; line-height:1; }
+    .grid { min-height:0; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .panel { border:1px solid rgba(212,212,212,.13); background:rgba(24,24,24,.9); padding:14px; min-width:0; display:grid; align-content:start; gap:12px; }
+    .metric { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:8px 0; border-bottom:1px solid rgba(212,212,212,.08); font-size:13px; }
+    .metric:last-child { border-bottom:0; }
+    .log { border:1px solid rgba(212,212,212,.12); background:rgba(8,8,8,.62); padding:12px; display:grid; gap:7px; font-size:12px; line-height:1.45; }
+    .actions { display:grid; grid-template-columns:minmax(0,1fr) 190px 190px; gap:10px; align-items:center; }
+    .btn { min-height:40px; border:1px solid rgba(78,201,176,.46); background:rgba(78,201,176,.12); color:var(--teal); font:inherit; border-radius:0; }
+    .btn.primary { background:var(--teal); color:#101010; font-weight:700; }
+    .teal{color:var(--teal)}.blue{color:var(--blue)}.green{color:var(--green)}.yellow{color:var(--yellow)}.orange{color:var(--orange)}.red{color:var(--red)}.dim{color:var(--dim)}.comment{color:var(--comment)}
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="JDS screen 08 stage clear result">
+    <section class="terminal">
+      <header class="titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span>jiyoon@ssafy: ~/debug-survival/stage.result</span></header>
+      <section class="workspace">
+        <aside class="sidebar">
+          <div><div class="label">Explorer</div><h3>stage_01_report</h3></div>
+          <div class="tree">
+            <div class="file active">✓ tests.passed</div>
+            <div class="file">✓ commit.successful</div>
+            <div class="file">+ rewards.json</div>
+            <div class="file">+ unlocks.md</div>
+            <div class="file">→ next_stage.cfg</div>
+          </div>
+          <div class="badge"><span class="label">Run Status</span><b>stage cleared</b><span>all required checks passed</span></div>
+        </aside>
+        <section class="main">
+          <header class="hero">
+            <div>
+              <div class="label green">tests passed / commit successful</div>
+              <h1>Stage<br>Cleared</h1>
+              <p class="dim">Python Basics stabilized. Error pressure dropped below failure threshold and the next curriculum branch is ready.</p>
+            </div>
+            <div class="score"><div><span class="label">Grade</span><strong>A</strong><span class="green">91,240 pts</span></div></div>
+          </header>
+          <section class="grid">
+            <article class="panel">
+              <span class="label">Combat Summary</span>
+              <div class="metric"><span>Clear time</span><b>06:42</b></div>
+              <div class="metric"><span>Bugs fixed</span><b class="green">186</b></div>
+              <div class="metric"><span>Damage taken</span><b class="orange">46</b></div>
+              <div class="metric"><span>Boss trace</span><b class="green">passed</b></div>
+            </article>
+            <article class="panel">
+              <span class="label">Rewards</span>
+              <div class="metric"><span>EXP</span><b class="green">+840</b></div>
+              <div class="metric"><span>Coins</span><b class="yellow">+120</b></div>
+              <div class="metric"><span>Reroll token</span><b class="teal">+1</b></div>
+              <div class="metric"><span>Heal cache</span><b class="blue">+1</b></div>
+            </article>
+            <article class="panel">
+              <span class="label">Unlocks</span>
+              <div class="metric"><span>Weapon file</span><b class="orange">Git.sh</b></div>
+              <div class="metric"><span>Monster log</span><b>IndentationError</b></div>
+              <div class="metric"><span>Next stage</span><b class="blue">Data Structures</b></div>
+              <div class="metric"><span>Codex entry</span><b class="green">+4</b></div>
+            </article>
+          </section>
+          <footer class="actions">
+            <div class="log">
+              <span><span class="teal">$</span> npm test -- stage_01</span>
+              <span class="green">✓ tests passed</span>
+              <span class="green">✓ commit successful: "stage cleared"</span>
+            </div>
+            <button class="btn">open codex</button>
+            <button class="btn primary">continue</button>
+          </footer>
+        </section>
+      </section>
+      <footer class="statusbar"><span>08_stage_clear_result_frontend_design.html</span><span>stage cleared</span><span>JDS</span></footer>
+    </section>
+    <div class="dim">DESIGN.md + frontend-design version: result screen with rewards, stats, unlocks, and next action.</div>
+  </main>
+</body>
+</html>

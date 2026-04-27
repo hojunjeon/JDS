@@ -1,4 +1,0 @@
-interface:
-  display_name: "JDY UI Review"
-  short_description: "Review JDY interface and HUD quality."
-  default_prompt: "Use the JDY UI review for this interface change."

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JDS 09 Game Over - Frontend Design</title>
+  <style>
+    :root {
+      --bg:#1e1e1e; --sidebar:#252526; --status:#007acc; --white:#d4d4d4; --dim:#858585;
+      --teal:#4ec9b0; --blue:#9cdcfe; --green:#b5cea8; --yellow:#dcdcaa; --orange:#ce9178; --red:#f44747;
+      --comment:#6a9955; --line:#3c3c3c;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; overflow:hidden; color:var(--white);
+      font-family:"JetBrains Mono","Space Mono","Noto Sans KR",Consolas,monospace;
+      background:
+        repeating-linear-gradient(0deg,rgba(255,255,255,.03),rgba(255,255,255,.03) 1px,transparent 1px,transparent 4px),
+        radial-gradient(circle at 50% 46%,rgba(244,71,71,.16),transparent 420px),
+        var(--bg);
+    }
+    .screen { min-height:100vh; padding:18px; display:grid; grid-template-rows:minmax(0,1fr) auto; gap:10px; }
+    .terminal { min-height:0; border:1px solid var(--line); background:rgba(30,30,30,.98); display:grid; grid-template-rows:34px minmax(0,1fr) 28px; box-shadow:0 0 44px rgba(244,71,71,.14); }
+    .titlebar,.statusbar { display:flex; align-items:center; gap:10px; padding:0 12px; font-size:12px; min-width:0; }
+    .titlebar { background:var(--sidebar); border-bottom:1px solid var(--line); color:var(--dim); }
+    .statusbar { justify-content:space-between; background:#6f1d1d; color:#fff; }
+    .dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; }
+    .dot.red{background:#ff5f57}.dot.yellow{background:#ffbd2e}.dot.green{background:#28c840}
+    .workspace {
+      min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:0; overflow:hidden;
+      background:
+        linear-gradient(rgba(156,220,254,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(156,220,254,.025) 1px,transparent 1px),
+        #141414; background-size:36px 36px;
+      position:relative;
+    }
+    .workspace::after {
+      content:""; position:absolute; inset:0; pointer-events:none;
+      background:linear-gradient(90deg,rgba(244,71,71,.12),transparent 24%,transparent 76%,rgba(244,71,71,.12));
+    }
+    .main { min-width:0; padding:24px; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:18px; z-index:1; }
+    .headline { border:1px solid rgba(244,71,71,.58); border-left:6px solid var(--red); background:linear-gradient(135deg,rgba(244,71,71,.16),transparent 44%),rgba(18,18,18,.96); padding:20px; }
+    .label { color:var(--dim); font-size:11px; text-transform:uppercase; }
+    h1 { margin:8px 0 0; font-size:clamp(54px,8vw,108px); line-height:.86; letter-spacing:0; color:var(--white); text-shadow:4px 0 rgba(244,71,71,.55),-3px 0 rgba(156,220,254,.18); }
+    .sub { color:var(--dim); max-width:760px; line-height:1.55; }
+    .content { min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .panel { border:1px solid rgba(212,212,212,.13); background:rgba(24,24,24,.92); padding:14px; min-width:0; display:grid; align-content:start; gap:12px; }
+    .trace { border:1px solid rgba(244,71,71,.24); background:rgba(8,8,8,.68); padding:12px; display:grid; gap:7px; font-size:12px; line-height:1.45; }
+    .metric { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:8px 0; border-bottom:1px solid rgba(212,212,212,.08); font-size:13px; }
+    .metric:last-child { border-bottom:0; }
+    .actions { display:grid; grid-template-columns:minmax(0,1fr) 170px 170px; gap:10px; align-items:center; }
+    .btn { min-height:42px; border:1px solid rgba(78,201,176,.46); background:rgba(78,201,176,.12); color:var(--teal); font:inherit; border-radius:0; }
+    .btn.primary { background:var(--teal); color:#101010; font-weight:700; }
+    .sidebar { border-left:1px solid var(--line); background:rgba(37,37,38,.94); padding:16px; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:14px; z-index:1; }
+    .death-card { border:1px solid rgba(244,71,71,.34); background:rgba(244,71,71,.06); padding:12px; display:grid; gap:8px; }
+    .timeline { display:grid; align-content:start; gap:10px; font-size:12px; color:var(--dim); }
+    .event { border-left:3px solid var(--line); padding:0 0 0 10px; display:grid; gap:4px; }
+    .event.fail { border-left-color:var(--red); }
+    .event.warn { border-left-color:var(--orange); }
+    .event.ok { border-left-color:var(--green); }
+    .teal{color:var(--teal)}.blue{color:var(--blue)}.green{color:var(--green)}.yellow{color:var(--yellow)}.orange{color:var(--orange)}.red{color:var(--red)}.dim{color:var(--dim)}.comment{color:var(--comment)}
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="JDS screen 09 game over">
+    <section class="terminal">
+      <header class="titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span>jiyoon@ssafy: ~/debug-survival/session.failed</span></header>
+      <section class="workspace">
+        <section class="main">
+          <header class="headline">
+            <div class="label red">Process terminated</div>
+            <h1>Debug<br>Session Failed</h1>
+            <p class="sub">The runtime collapsed after repeated contact damage. The next retry keeps unlocked codex entries and offers a cleaner route recommendation.</p>
+          </header>
+          <section class="content">
+            <article class="panel">
+              <span class="label">Failure Trace</span>
+              <div class="trace">
+                <span><span class="red">FatalError</span>: player.hp reached <span class="green">0</span></span>
+                <span>at boss.spawn(<span class="orange">"Jang Seonhyeong"</span>)</span>
+                <span>at wave[<span class="green">05</span>].contactDamage()</span>
+                <span class="comment">// retry recommended with movement upgrade before boss threshold</span>
+              </div>
+            </article>
+            <article class="panel">
+              <span class="label">Run Summary</span>
+              <div class="metric"><span>Survival time</span><b>05:18</b></div>
+              <div class="metric"><span>Bugs fixed</span><b class="green">142</b></div>
+              <div class="metric"><span>Top damage source</span><b class="red">EnvError dash</b></div>
+              <div class="metric"><span>Unlocked logs kept</span><b class="teal">7</b></div>
+            </article>
+          </section>
+          <footer class="actions">
+            <div class="trace">
+              <span><span class="teal">$</span> retry?</span>
+              <span class="dim">recommended: Python.py + Runtime speed boost</span>
+            </div>
+            <button class="btn">open codex</button>
+            <button class="btn primary">retry stage</button>
+          </footer>
+        </section>
+        <aside class="sidebar">
+          <div class="death-card">
+            <span class="label">Last State</span>
+            <b class="red">HP 0 / 100</b>
+            <span class="dim">boss warning ignored while surrounded</span>
+          </div>
+          <div class="timeline">
+            <div class="event ok"><b>03:24</b><span>Quest accepted: indent-lab-rescue</span></div>
+            <div class="event ok"><b>04:56</b><span>CRITICAL ERROR warning displayed</span></div>
+            <div class="event warn"><b>05:04</b><span>EnvError dash chain started</span></div>
+            <div class="event fail"><b>05:18</b><span>Process terminated</span></div>
+          </div>
+          <div class="death-card">
+            <span class="label">Advice</span>
+            <span>Take the support patch if HP is below 70 before boss spawn.</span>
+          </div>
+        </aside>
+      </section>
+      <footer class="statusbar"><span>09_game_over_frontend_design.html</span><span>debug session failed</span><span>JDS</span></footer>
+    </section>
+    <div class="dim">DESIGN.md + frontend-design version: failure result with retry path, cause analysis, and retained progress.</div>
+  </main>
+</body>
+</html>

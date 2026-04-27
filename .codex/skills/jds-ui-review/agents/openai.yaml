@@ -1,0 +1,4 @@
+interface:
+  display_name: "JDS UI Review"
+  short_description: "Review JDS interface and HUD quality."
+  default_prompt: "Use the JDS UI review for this interface change."

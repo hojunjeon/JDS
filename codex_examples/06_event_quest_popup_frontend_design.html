@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JDS 06 Event Quest Popup - Frontend Design</title>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --sidebar: #252526;
+      --status: #007acc;
+      --white: #d4d4d4;
+      --dim: #858585;
+      --teal: #4ec9b0;
+      --blue: #9cdcfe;
+      --green: #b5cea8;
+      --yellow: #dcdcaa;
+      --orange: #ce9178;
+      --red: #f44747;
+      --comment: #6a9955;
+      --line: #3c3c3c;
+      --panel: rgba(30, 30, 30, 0.92);
+      --panel-strong: rgba(18, 18, 18, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        radial-gradient(circle at 68% 23%, rgba(206, 145, 120, 0.08), transparent 280px),
+        radial-gradient(circle at 38% 60%, rgba(78, 201, 176, 0.1), transparent 360px),
+        var(--bg);
+      background-size: 100% 4px, 56px 56px, auto, auto, auto;
+      color: var(--white);
+      font-family: "JetBrains Mono", "Space Mono", "Noto Sans KR", Consolas, monospace;
+    }
+
+    .screen {
+      min-height: 100vh;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .terminal {
+      min-height: 0;
+      border: 1px solid var(--line);
+      background: rgba(30, 30, 30, 0.97);
+      box-shadow:
+        0 0 0 1px rgba(78, 201, 176, 0.04),
+        0 0 34px rgba(78, 201, 176, 0.12);
+      display: grid;
+      grid-template-rows: 34px minmax(0, 1fr) 28px;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .terminal::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: 34px 0 28px;
+      z-index: 40;
+      opacity: 0.35;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.026),
+        rgba(255, 255, 255, 0.026) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+    }
+
+    .titlebar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--line);
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #28c840; }
+
+    .window-title {
+      margin-left: 8px;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .arena {
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(156, 220, 254, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(156, 220, 254, 0.035) 1px, transparent 1px),
+        radial-gradient(circle at 50% 52%, rgba(78, 201, 176, 0.1), transparent 280px),
+        #151515;
+      background-size: 36px 36px, 36px 36px, auto, auto;
+    }
+
+    .arena::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 24% 26%, rgba(244, 71, 71, 0.11), transparent 190px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.14), transparent 40%, rgba(0, 0, 0, 0.22));
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .hud {
+      position: absolute;
+      inset: 12px;
+      display: grid;
+      grid-template-rows: 94px minmax(0, 1fr) 74px;
+      gap: 10px;
+      z-index: 4;
+    }
+
+    .top-hud,
+    .bottom-hud {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr) 270px;
+      gap: 10px;
+    }
+
+    .bottom-hud {
+      grid-template-columns: minmax(0, 1fr) 300px;
+    }
+
+    .panel {
+      min-width: 0;
+      border: 1px solid rgba(212, 212, 212, 0.14);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+    }
+
+    .hud-block {
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--dim);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat-line {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 72px;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .meter {
+      min-width: 0;
+      height: 8px;
+      border: 1px solid rgba(212, 212, 212, 0.17);
+      background: #111;
+      overflow: hidden;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: var(--v);
+      background: linear-gradient(90deg, var(--c1), var(--c2));
+    }
+
+    .timer {
+      display: grid;
+      place-items: center;
+      padding: 9px 10px;
+      background: rgba(0, 0, 0, 0.22);
+      border-left: 3px solid var(--teal);
+      border-right: 3px solid var(--teal);
+      text-align: center;
+    }
+
+    .timer strong {
+      color: var(--white);
+      font-size: 42px;
+      line-height: 1;
+    }
+
+    .timer span {
+      color: var(--comment);
+      font-size: 12px;
+    }
+
+    .mini-arena {
+      position: relative;
+      min-height: 0;
+    }
+
+    .hero,
+    .mob,
+    .bolt,
+    .xp {
+      position: absolute;
+    }
+
+    .hero {
+      left: 50%;
+      top: 52%;
+      width: 34px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      border: 2px solid var(--teal);
+      background: rgba(78, 201, 176, 0.14);
+      box-shadow: 0 0 32px rgba(78, 201, 176, 0.48);
+      z-index: 2;
+    }
+
+    .hero::before {
+      content: "JY";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .mob {
+      width: 46px;
+      height: 30px;
+      border: 1px solid currentColor;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      background: rgba(20, 20, 20, 0.84);
+      box-shadow: 0 0 18px color-mix(in srgb, currentColor 22%, transparent);
+    }
+
+    .mob.syntax { color: var(--red); left: 18%; top: 24%; }
+    .mob.null { color: var(--blue); right: 24%; top: 22%; }
+    .mob.indent { color: var(--orange); left: 31%; bottom: 18%; }
+    .mob.env { color: var(--yellow); right: 18%; bottom: 28%; width: 58px; }
+    .mob.loop { color: var(--green); left: 58%; bottom: 16%; width: 54px; }
+
+    .bolt {
+      left: 50%;
+      top: 52%;
+      height: 3px;
+      width: 128px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, var(--teal), var(--blue), transparent);
+      filter: drop-shadow(0 0 8px rgba(156, 220, 254, 0.65));
+      animation: cast 1.5s ease-in-out infinite;
+    }
+
+    .bolt.b1 { transform: rotate(22deg) translateX(20px); }
+    .bolt.b2 { transform: rotate(144deg) translateX(20px); animation-delay: 0.2s; }
+    .bolt.b3 { transform: rotate(244deg) translateX(20px); animation-delay: 0.4s; }
+
+    .xp {
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--green);
+      background: rgba(181, 206, 168, 0.22);
+      box-shadow: 0 0 12px rgba(181, 206, 168, 0.5);
+      animation: float 2.2s ease-in-out infinite;
+    }
+
+    .xp.x1 { left: 42%; top: 34%; }
+    .xp.x2 { left: 55%; top: 30%; animation-delay: 0.25s; }
+    .xp.x3 { left: 61%; top: 61%; animation-delay: 0.5s; }
+    .xp.x4 { left: 36%; top: 58%; animation-delay: 0.75s; }
+
+    .weapons {
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .slot {
+      min-width: 0;
+      min-height: 54px;
+      border: 1px solid rgba(212, 212, 212, 0.13);
+      background: rgba(255, 255, 255, 0.025);
+      padding: 8px;
+      display: grid;
+      align-content: space-between;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    .slot b {
+      color: var(--white);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-queue {
+      padding: 10px;
+      display: grid;
+      align-content: center;
+      gap: 6px;
+      font-size: 12px;
+      border-color: rgba(206, 145, 120, 0.28);
+    }
+
+    .quest-toast {
+      position: absolute;
+      z-index: 24;
+      right: 28px;
+      top: 122px;
+      width: min(520px, calc(100vw - 76px));
+      border: 1px solid rgba(206, 145, 120, 0.58);
+      border-left: 4px solid var(--orange);
+      background:
+        linear-gradient(135deg, rgba(206, 145, 120, 0.16), transparent 43%),
+        linear-gradient(315deg, rgba(78, 201, 176, 0.08), transparent 38%),
+        rgba(24, 24, 24, 0.98);
+      box-shadow:
+        0 18px 56px rgba(0, 0, 0, 0.46),
+        0 0 30px rgba(206, 145, 120, 0.16);
+      display: grid;
+      grid-template-rows: auto auto auto;
+      overflow: hidden;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast-head {
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      background: rgba(37, 37, 38, 0.86);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .toast-title {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--white);
+      font-size: clamp(20px, 2.3vw, 32px);
+      line-height: 1.08;
+      letter-spacing: 0;
+      text-shadow: 0 0 18px rgba(206, 145, 120, 0.18);
+    }
+
+    .toast-tag {
+      width: 74px;
+      min-height: 30px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(220, 220, 170, 0.36);
+      color: var(--yellow);
+      background: rgba(220, 220, 170, 0.08);
+      font-size: 12px;
+    }
+
+    .toast-body {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .story-line {
+      color: var(--dim);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .code-callout {
+      border: 1px solid rgba(212, 212, 212, 0.11);
+      background: rgba(8, 8, 8, 0.6);
+      padding: 11px;
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .quest-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px;
+      gap: 10px;
+    }
+
+    .quest-task,
+    .quest-reward {
+      min-width: 0;
+      border: 1px solid rgba(212, 212, 212, 0.12);
+      background: rgba(255, 255, 255, 0.025);
+      padding: 11px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .task-line {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) 44px;
+      align-items: center;
+      gap: 9px;
+      font-size: 12px;
+    }
+
+    .task-icon {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(206, 145, 120, 0.34);
+      color: var(--orange);
+      background: rgba(206, 145, 120, 0.08);
+    }
+
+    .progress {
+      display: grid;
+      gap: 6px;
+    }
+
+    .reward-list {
+      display: grid;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--dim);
+    }
+
+    .reward-list b {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .toast-foot {
+      min-width: 0;
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      background: rgba(18, 18, 18, 0.9);
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .accept {
+      min-height: 34px;
+      border: 1px solid rgba(78, 201, 176, 0.52);
+      background: rgba(78, 201, 176, 0.13);
+      color: var(--teal);
+      font: inherit;
+      font-size: 12px;
+      padding: 0 12px;
+      border-radius: 0;
+    }
+
+    .quest-pin {
+      position: absolute;
+      z-index: 12;
+      left: 28px;
+      top: 122px;
+      width: 284px;
+      border: 1px solid rgba(78, 201, 176, 0.36);
+      border-top: 3px solid var(--teal);
+      background: var(--panel-strong);
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.34);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      animation: pulse 2.8s ease-in-out infinite;
+    }
+
+    .pin-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .statusbar {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 12px;
+      background: var(--status);
+      color: #fff;
+      font-size: 12px;
+      z-index: 50;
+    }
+
+    .hint {
+      color: var(--dim);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .teal { color: var(--teal); }
+    .blue { color: var(--blue); }
+    .green { color: var(--green); }
+    .yellow { color: var(--yellow); }
+    .red { color: var(--red); }
+    .orange { color: var(--orange); }
+    .comment { color: var(--comment); }
+    .dim { color: var(--dim); }
+    .kw { color: var(--blue); }
+    .fn { color: var(--yellow); }
+    .str { color: var(--orange); }
+    .num { color: var(--green); }
+    .var { color: var(--teal); }
+
+    @keyframes cast {
+      0%, 100% { opacity: 0.25; width: 58px; }
+      48% { opacity: 1; width: 142px; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); opacity: 0.45; }
+      50% { transform: translateY(-10px); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 10px 36px rgba(0, 0, 0, 0.34), 0 0 0 rgba(78, 201, 176, 0); }
+      50% { box-shadow: 0 10px 36px rgba(0, 0, 0, 0.34), 0 0 24px rgba(78, 201, 176, 0.16); }
+    }
+
+    @media (max-width: 1060px) {
+      body {
+        overflow: auto;
+      }
+
+      .terminal {
+        min-height: 1040px;
+      }
+
+      .hud {
+        grid-template-rows: 150px minmax(0, 1fr) 112px;
+      }
+
+      .top-hud {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .timer {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
+
+      .quest-toast {
+        top: 182px;
+      }
+
+      .quest-pin {
+        top: 182px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .screen {
+        padding: 10px;
+      }
+
+      .terminal {
+        min-height: 1280px;
+        grid-template-rows: 34px minmax(0, 1fr) auto;
+      }
+
+      .terminal::after {
+        inset-bottom: 48px;
+      }
+
+      .hud {
+        inset: 10px;
+        grid-template-rows: 96px minmax(0, 1fr) 96px;
+      }
+
+      .top-hud {
+        grid-template-columns: 1fr;
+      }
+
+      .top-hud .hud-block,
+      .bottom-hud .event-queue {
+        display: none;
+      }
+
+      .timer strong {
+        font-size: 34px;
+      }
+
+      .bottom-hud {
+        grid-template-columns: 1fr;
+      }
+
+      .weapons {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .weapons .slot:nth-child(n+3) {
+        display: none;
+      }
+
+      .quest-pin {
+        left: 20px;
+        right: 20px;
+        top: 136px;
+        width: auto;
+      }
+
+      .quest-toast {
+        left: 20px;
+        right: 20px;
+        top: 296px;
+        width: auto;
+      }
+
+      .quest-grid,
+      .toast-foot {
+        grid-template-columns: 1fr;
+      }
+
+      .quest-reward {
+        grid-template-columns: 1fr;
+      }
+
+      .statusbar {
+        min-height: 28px;
+        flex-wrap: wrap;
+        padding: 6px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen" aria-label="JDS screen 06 event quest popup using frontend-design and DESIGN.md">
+    <section class="terminal">
+      <header class="titlebar">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="window-title">jiyoon@ssafy: ~/debug-survival/event.quest</span>
+      </header>
+
+      <section class="arena" aria-label="combat scene with quest event popup">
+        <div class="hud" aria-hidden="true">
+          <div class="top-hud">
+            <div class="panel hud-block">
+              <div class="label">Player Runtime</div>
+              <div class="stat-line">
+                <span class="red">HP</span>
+                <div class="meter"><span style="--v: 71%; --c1: var(--red); --c2: var(--orange)"></span></div>
+                <span>71 / 100</span>
+              </div>
+              <div class="stat-line">
+                <span class="green">EXP</span>
+                <div class="meter"><span style="--v: 42%; --c1: var(--green); --c2: var(--teal)"></span></div>
+                <span>Lv. 04</span>
+              </div>
+            </div>
+
+            <div class="panel timer">
+              <strong>03:24</strong>
+              <span>Stage 1 / Python Basics / Quest Injected</span>
+            </div>
+
+            <div class="panel hud-block">
+              <div class="label">Selected Weapon</div>
+              <strong class="teal">Python.py</strong>
+              <span class="dim">serpent trace +1 / cooldown 0.58s</span>
+            </div>
+          </div>
+
+          <div class="mini-arena">
+            <div class="mob syntax">ERR</div>
+            <div class="mob null">NULL</div>
+            <div class="mob indent">TAB</div>
+            <div class="mob env">ENV</div>
+            <div class="mob loop">LOOP</div>
+            <div class="xp x1"></div>
+            <div class="xp x2"></div>
+            <div class="xp x3"></div>
+            <div class="xp x4"></div>
+            <div class="bolt b1"></div>
+            <div class="bolt b2"></div>
+            <div class="bolt b3"></div>
+            <div class="hero"></div>
+          </div>
+
+          <div class="bottom-hud">
+            <div class="panel weapons">
+              <div class="slot"><b>Python.py</b><span class="teal">ready</span></div>
+              <div class="slot"><b>Java.class</b><span class="yellow">orbit 62%</span></div>
+              <div class="slot"><b>Git.sh</b><span>locked</span></div>
+              <div class="slot"><b>SQL.sql</b><span>locked</span></div>
+              <div class="slot"><b>empty</b><span>slot 05</span></div>
+            </div>
+            <div class="panel event-queue">
+              <span class="label">Event Queue</span>
+              <b class="orange">IndentationError keeps breaking the lab!</b>
+              <span class="dim">quest popup is non-blocking</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="quest-pin" aria-label="pinned quest progress">
+          <div class="pin-row">
+            <span class="label">Pinned Quest</span>
+            <span class="orange">ACTIVE</span>
+          </div>
+          <div class="pin-row">
+            <b>Fix indentation bugs</b>
+            <span>0 / 10</span>
+          </div>
+          <div class="progress">
+            <div class="meter"><span style="--v: 0%; --c1: var(--orange); --c2: var(--yellow)"></span></div>
+            <span class="dim">Target marked enemies: TAB, SPACE, mixed-indent</span>
+          </div>
+        </aside>
+
+        <section class="quest-toast" aria-label="event quest popup">
+          <header class="toast-head">
+            <div class="toast-title">
+              <div class="label">// event.dispatch("side_quest")</div>
+              <h1>IndentationError keeps breaking the lab!</h1>
+            </div>
+            <div class="toast-tag">QUEST</div>
+          </header>
+
+          <div class="toast-body">
+            <p class="story-line">
+              The IDE is dead. Keep the session alive while the lab terminal floods the arena with broken blocks and mixed tabs.
+            </p>
+
+            <div class="code-callout" aria-label="quest script preview">
+              <span><span class="kw">if</span> bug.type == <span class="str">"IndentationError"</span>:</span>
+              <span>  <span class="fn">mark_target</span>(bug, reward=<span class="num">true</span>)</span>
+              <span class="comment"># quest reward unlocks a safer route to the boss wave</span>
+            </div>
+
+            <div class="quest-grid">
+              <div class="quest-task">
+                <span class="label">Objective</span>
+                <div class="task-line">
+                  <span class="task-icon">TAB</span>
+                  <b>Fix 10 indentation bugs</b>
+                  <span class="orange">0/10</span>
+                </div>
+                <div class="progress">
+                  <div class="meter"><span style="--v: 0%; --c1: var(--orange); --c2: var(--yellow)"></span></div>
+                  <span class="dim">Progress updates in the pinned quest panel.</span>
+                </div>
+              </div>
+
+              <div class="quest-reward">
+                <span class="label">Reward</span>
+                <div class="reward-list">
+                  <span><b>+120 EXP</b></span>
+                  <span><b>+1 reroll</b></span>
+                  <span class="teal">boss warning delay +4s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer class="toast-foot">
+            <code><span class="teal">quest</span>.<span class="yellow">accept</span>(<span class="str">"indent-lab-rescue"</span>)</code>
+            <button class="accept">accept and continue</button>
+          </footer>
+        </section>
+      </section>
+
+      <footer class="statusbar">
+        <span>06_event_quest_popup_frontend_design.html</span>
+        <span>Quest active - combat continues</span>
+        <span>UTF-8</span>
+        <span>JDS</span>
+      </footer>
+    </section>
+
+    <div class="hint">
+      DESIGN.md + frontend-design version: non-blocking event popup, pinned quest progress, story-to-reward connection, desktop/mobile screenshot target.
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "JDS Development Workflow"
+  short_description: "Run the JDS project development workflow."
+  default_prompt: "Use the JDS development workflow for this project request."

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JDS UI Screen Review Deck</title>
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --panel: #252526;
+      --panel-2: #2d2d30;
+      --status: #007acc;
+      --white: #d4d4d4;
+      --dim: #858585;
+      --teal: #4ec9b0;
+      --blue: #9cdcfe;
+      --green: #b5cea8;
+      --yellow: #dcdcaa;
+      --orange: #ce9178;
+      --red: #f44747;
+      --comment: #6a9955;
+      --line: rgba(212, 212, 212, 0.13);
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--white);
+      font-family: "JetBrains Mono", "Cascadia Mono", "Fira Code", Consolas, monospace;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        radial-gradient(circle at 16% 4%, rgba(78, 201, 176, 0.16), transparent 28rem),
+        radial-gradient(circle at 88% 16%, rgba(244, 71, 71, 0.11), transparent 30rem),
+        var(--bg);
+      background-size: 100% 4px, auto, auto, auto;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1540px, calc(100vw - 40px));
+      margin: 20px auto 32px;
+      border: 1px solid var(--line);
+      background: rgba(37, 37, 38, 0.88);
+      box-shadow: var(--shadow);
+      min-height: calc(100vh - 52px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .titlebar {
+      height: 38px;
+      display: grid;
+      grid-template-columns: 120px 1fr 280px;
+      align-items: center;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+      background: #1b1b1c;
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .traffic {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: block;
+    }
+
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #28c840; }
+
+    .path {
+      justify-self: center;
+      color: var(--blue);
+    }
+
+    .review-state {
+      justify-self: end;
+      color: var(--green);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      min-height: 0;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(30, 30, 30, 0.76);
+      padding: 16px 14px;
+    }
+
+    .eyebrow {
+      color: var(--comment);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 9px;
+    }
+
+    .brand {
+      margin: 0 0 18px;
+      font-size: 28px;
+      line-height: 0.95;
+      color: var(--white);
+      text-shadow: 0 0 22px rgba(78, 201, 176, 0.22);
+    }
+
+    .tree {
+      display: grid;
+      gap: 6px;
+      margin: 18px 0 22px;
+    }
+
+    .tree a {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      align-items: center;
+      min-height: 34px;
+      border: 1px solid transparent;
+      padding: 0 9px;
+      color: var(--dim);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tree a:hover,
+    .tree a:focus-visible {
+      border-color: rgba(78, 201, 176, 0.45);
+      color: var(--white);
+      outline: none;
+      background: rgba(78, 201, 176, 0.07);
+    }
+
+    .tree .num {
+      color: var(--teal);
+      font-size: 12px;
+    }
+
+    .side-panel {
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.18);
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .side-panel strong {
+      display: block;
+      color: var(--yellow);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .side-panel p {
+      margin: 0;
+      color: var(--dim);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .main {
+      min-width: 0;
+      padding: 22px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .terminal {
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(0, 122, 204, 0.09), transparent 34%),
+        rgba(30, 30, 30, 0.86);
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terminal::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.13) 50%);
+      background-size: 100% 4px;
+      mix-blend-mode: multiply;
+    }
+
+    .terminal h1 {
+      margin: 0;
+      max-width: 780px;
+      font-size: clamp(36px, 5vw, 74px);
+      line-height: 0.91;
+      letter-spacing: 0;
+      color: var(--white);
+      position: relative;
+      z-index: 1;
+    }
+
+    .terminal .prompt {
+      position: relative;
+      z-index: 1;
+      color: var(--teal);
+      margin-top: 18px;
+      font-size: 14px;
+    }
+
+    .terminal .prompt span {
+      color: var(--orange);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.16);
+      padding: 14px;
+      min-height: 92px;
+    }
+
+    .metric .value {
+      display: block;
+      margin-top: 9px;
+      font-size: 26px;
+      color: var(--blue);
+    }
+
+    .metric .label {
+      color: var(--dim);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .screen-card {
+      border: 1px solid var(--line);
+      background: rgba(30, 30, 30, 0.82);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .screen-head {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 68px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(37, 37, 38, 0.9);
+    }
+
+    .screen-no {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(78, 201, 176, 0.48);
+      color: var(--teal);
+      background: rgba(78, 201, 176, 0.08);
+      font-weight: 700;
+    }
+
+    .screen-title {
+      min-width: 0;
+    }
+
+    .screen-title h2 {
+      margin: 0 0 5px;
+      font-size: 15px;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .screen-title p {
+      margin: 0;
+      color: var(--dim);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      border: 1px solid rgba(156, 220, 254, 0.35);
+      color: var(--blue);
+      padding: 6px 8px;
+      font-size: 11px;
+      background: rgba(156, 220, 254, 0.06);
+    }
+
+    .preview {
+      height: 300px;
+      background: #111;
+      overflow: hidden;
+      position: relative;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .preview iframe {
+      width: 1440px;
+      height: 900px;
+      border: 0;
+      transform: scale(0.43);
+      transform-origin: 0 0;
+      pointer-events: none;
+      background: #1e1e1e;
+    }
+
+    .screen-meta {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .screen-meta code {
+      color: var(--green);
+      font-family: inherit;
+    }
+
+    .open-link {
+      color: var(--teal);
+      border: 1px solid rgba(78, 201, 176, 0.36);
+      padding: 8px 10px;
+      background: rgba(78, 201, 176, 0.06);
+    }
+
+    .open-link:hover,
+    .open-link:focus-visible {
+      background: rgba(78, 201, 176, 0.14);
+      outline: none;
+    }
+
+    .statusbar {
+      min-height: 30px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 18px;
+      align-items: center;
+      padding: 0 14px;
+      background: var(--status);
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .statusbar span {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1180px) {
+      .layout,
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .tree {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .review-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="titlebar">
+      <div class="traffic" aria-hidden="true">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="path">codex_examples/index.html</div>
+      <div class="review-state">UI_RENEWAL_PLAN.md linked</div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="eyebrow">// review workspace</div>
+        <h1 class="brand">JDS UI<br>Screen Deck</h1>
+        <nav class="tree" aria-label="Screen list">
+          <a href="#screen-01"><span class="num">01</span><span>Start</span></a>
+          <a href="#screen-02"><span class="num">02</span><span>Stage Select</span></a>
+          <a href="#screen-03"><span class="num">03</span><span>Weapon Select</span></a>
+          <a href="#screen-04"><span class="num">04</span><span>HUD</span></a>
+          <a href="#screen-05"><span class="num">05</span><span>Level Up</span></a>
+          <a href="#screen-06"><span class="num">06</span><span>Quest Popup</span></a>
+          <a href="#screen-07"><span class="num">07</span><span>Boss Warning</span></a>
+          <a href="#screen-08"><span class="num">08</span><span>Stage Clear</span></a>
+          <a href="#screen-09"><span class="num">09</span><span>Game Over</span></a>
+          <a href="#screen-10"><span class="num">10</span><span>Codex</span></a>
+        </nav>
+        <div class="side-panel">
+          <strong>Adoption rule</strong>
+          <p>Keep terminal/IDE structure, syntax color, compact state density, and command-first flow. Move only proven pieces into the Phaser or DOM UI.</p>
+        </div>
+        <div class="side-panel">
+          <strong>Next file</strong>
+          <p>Read <a href="UI_RENEWAL_PLAN.md">UI_RENEWAL_PLAN.md</a> before implementing the actual game UI.</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="hero">
+          <div class="terminal">
+            <div class="eyebrow">// batch review command</div>
+            <h1>compare screens<br>before refactor</h1>
+            <div class="prompt">jiyoon@ssafy:~/jds$ <span>npm run review:ui</span></div>
+          </div>
+          <div class="metrics" aria-label="Review metrics">
+            <div class="metric"><span class="label">HTML screens</span><span class="value">10</span></div>
+            <div class="metric"><span class="label">Primary style</span><span class="value">IDE</span></div>
+            <div class="metric"><span class="label">First phase</span><span class="value">01-04</span></div>
+            <div class="metric"><span class="label">Risk focus</span><span class="value">HUD</span></div>
+          </div>
+        </section>
+
+        <section class="review-grid" aria-label="Screen previews">
+          <article class="screen-card" id="screen-01">
+            <div class="screen-head"><div class="screen-no">01</div><div class="screen-title"><h2>Start / Boot Screen</h2><p>Terminal boot, logo, first command</p></div><span class="badge">menu</span></div>
+            <div class="preview"><iframe title="01 Start Screen" src="01_start_screen_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>01_start_screen_frontend_design.html</code><a class="open-link" href="01_start_screen_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-02">
+            <div class="screen-head"><div class="screen-no">02</div><div class="screen-title"><h2>Stage Select / Curriculum Pipeline</h2><p>SSAFY stages as execution pipeline</p></div><span class="badge">flow</span></div>
+            <div class="preview"><iframe title="02 Stage Select" src="02_stage_select_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>02_stage_select_frontend_design.html</code><a class="open-link" href="02_stage_select_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-03">
+            <div class="screen-head"><div class="screen-no">03</div><div class="screen-title"><h2>Weapon Select / Source Arsenal</h2><p>Weapons represented as source files</p></div><span class="badge">menu</span></div>
+            <div class="preview"><iframe title="03 Weapon Select" src="03_weapon_select_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>03_weapon_select_frontend_design.html</code><a class="open-link" href="03_weapon_select_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-04">
+            <div class="screen-head"><div class="screen-no">04</div><div class="screen-title"><h2>In-Game HUD</h2><p>Combat state as compact debug console</p></div><span class="badge">runtime</span></div>
+            <div class="preview"><iframe title="04 In-Game HUD" src="04_in_game_hud_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>04_in_game_hud_frontend_design.html</code><a class="open-link" href="04_in_game_hud_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-05">
+            <div class="screen-head"><div class="screen-no">05</div><div class="screen-title"><h2>Level Up / Upgrade Modal</h2><p>Quick Fix selection over paused combat</p></div><span class="badge">modal</span></div>
+            <div class="preview"><iframe title="05 Level Up" src="05_level_up_upgrade_modal_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>05_level_up_upgrade_modal_frontend_design.html</code><a class="open-link" href="05_level_up_upgrade_modal_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-06">
+            <div class="screen-head"><div class="screen-no">06</div><div class="screen-title"><h2>Event / Quest Popup</h2><p>Non-blocking quest toast and pinned objective</p></div><span class="badge">quest</span></div>
+            <div class="preview"><iframe title="06 Event Quest" src="06_event_quest_popup_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>06_event_quest_popup_frontend_design.html</code><a class="open-link" href="06_event_quest_popup_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-07">
+            <div class="screen-head"><div class="screen-no">07</div><div class="screen-title"><h2>Boss Warning</h2><p>Critical error transition into boss spawn</p></div><span class="badge">danger</span></div>
+            <div class="preview"><iframe title="07 Boss Warning" src="07_boss_warning_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>07_boss_warning_frontend_design.html</code><a class="open-link" href="07_boss_warning_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-08">
+            <div class="screen-head"><div class="screen-no">08</div><div class="screen-title"><h2>Stage Clear / Result</h2><p>Test pass, commit success, reward summary</p></div><span class="badge">result</span></div>
+            <div class="preview"><iframe title="08 Stage Clear" src="08_stage_clear_result_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>08_stage_clear_result_frontend_design.html</code><a class="open-link" href="08_stage_clear_result_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-09">
+            <div class="screen-head"><div class="screen-no">09</div><div class="screen-title"><h2>Game Over</h2><p>Failed debug session with retry path</p></div><span class="badge">failure</span></div>
+            <div class="preview"><iframe title="09 Game Over" src="09_game_over_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>09_game_over_frontend_design.html</code><a class="open-link" href="09_game_over_frontend_design.html">open</a></div>
+          </article>
+
+          <article class="screen-card" id="screen-10">
+            <div class="screen-head"><div class="screen-no">10</div><div class="screen-title"><h2>Collection / Codex</h2><p>Weapons, monsters, boss logs, learning progress</p></div><span class="badge">meta</span></div>
+            <div class="preview"><iframe title="10 Collection Codex" src="10_collection_codex_frontend_design.html"></iframe></div>
+            <div class="screen-meta"><code>10_collection_codex_frontend_design.html</code><a class="open-link" href="10_collection_codex_frontend_design.html">open</a></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <footer class="statusbar">
+      <span>main: UI screen review deck</span>
+      <span>desktop preview target: 1440x900</span>
+      <span>mobile check: skipped by request</span>
+    </footer>
+  </div>
+</body>
+</html>

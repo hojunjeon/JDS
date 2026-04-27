@@ -1,0 +1,4 @@
+interface:
+  display_name: "JDS Game Design Review"
+  short_description: "Review JDS gameplay quality."
+  default_prompt: "Use the JDS game design review for this gameplay change."
