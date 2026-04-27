@@ -4,8 +4,9 @@ This plan converts the `codex_examples` HTML screen drafts into an implementatio
 
 Root plan index:
 
-- `C:\Users\SSAFY\Desktop\JDY\PLANS.md`
-- Keep the UI Renewal entry status in `PLANS.md` synchronized with this plan's `Progress checklist`.
+- `PLANS.md`
+- Keep the root UI Renewal entry in `PLANS.md` as `[~]` until every phase is implemented and verified.
+- Keep phase execution checklists in `docs/superpowers/plans/`.
 
 ## Session Handoff
 
@@ -15,10 +16,30 @@ Current status:
 
 - The UI renewal workflow has started from this plan and `codex_examples/index.html`.
 - `DESIGN.md` remains the visual source of truth.
-- Phase 1 is in progress.
+- Phase 1 DOM menu alignment is visually realigned and verified.
 - Completed first TDD slice: shared UI tokens are now in `src/ui/theme.ts`.
 - Added tests in `tests/uiTheme.test.ts`.
 - `src/scenes/MenuScene.ts` has been refactored to use the shared theme tokens and to better match the 01 Start / Boot Screen direction.
+- Added the typed Phase 1 menu-flow model in `src/ui/menuFlow.ts`.
+- Added tests in `tests/menuFlow.test.ts`.
+- `MenuScene` now renders separate start, stage-select, and weapon-select screens before entering gameplay.
+- Phase 1 DOM menu alignment, Phase 2, Phase 3, and Phase 4 now have separate `superpowers:writing-plans` execution plan files.
+- Phase 1 DOM menu alignment verified with:
+  - `npm test`
+  - `npm run build`
+  - `npm run e2e`
+  - `test-results/phase1-dom-start-1440x900.png`
+  - `test-results/phase1-dom-stage-1440x900.png`
+  - `test-results/phase1-dom-weapon-1440x900.png`
+
+Phase Status Matrix:
+
+| Phase | Scope | Status | Execution plan |
+| --- | --- | --- | --- |
+| Phase 1 | Core Menu Flow + DOM Visual Alignment | Complete | `docs/superpowers/plans/2026-04-27-ui-renewal-phase-1-dom-menu-alignment.md` |
+| Phase 2 | Hybrid Runtime Overlay | Not started | `docs/superpowers/plans/2026-04-27-ui-renewal-phase-2-runtime-overlay.md` |
+| Phase 3 | DOM Decision and Result Screens | Not started | `docs/superpowers/plans/2026-04-27-ui-renewal-phase-3-decision-result.md` |
+| Phase 4 | DOM Meta Progression | Not started | `docs/superpowers/plans/2026-04-27-ui-renewal-phase-4-meta-progression.md` |
 
 Progress checklist:
 
@@ -27,21 +48,35 @@ Progress checklist:
 - [x] Add shared UI theme tokens in `src/ui/theme.ts`.
 - [x] Add theme tests in `tests/uiTheme.test.ts`.
 - [x] Refactor `src/scenes/MenuScene.ts` to use shared theme tokens.
-- [x] Apply the first 01 Start / Boot Screen production pass.
-- [ ] Add typed Phase 1 menu-flow model in `src/ui/menuFlow.ts`.
-- [ ] Add `tests/menuFlow.test.ts` for `start`, `stage-select`, and `weapon-select`.
-- [ ] Implement tested transitions from start command to stage select to weapon select to game start.
-- [ ] Wire `MenuScene` to render state-specific Phase 1 panels.
-- [ ] Verify `Enter`, number keys, and pointer interactions across Phase 1 screens.
-- [ ] Run focused tests, `npm test`, `npm run build`, and relevant Playwright desktop check.
-- [ ] Mark Phase 1 complete only after 01/02/03 flow reaches gameplay.
+- [x] Apply the first 01 Start / Boot Screen production pass as a Phaser prototype.
+- [x] Add typed Phase 1 menu-flow model in `src/ui/menuFlow.ts`.
+- [x] Add `tests/menuFlow.test.ts` for `start`, `stage-select`, and `weapon-select`.
+- [x] Implement tested transitions from start command to stage select to weapon select to game start.
+- [x] Wire `MenuScene` to render state-specific Phase 1 panels.
+- [x] Verify `Enter`, number keys, and pointer interactions across Phase 1 screens.
+- [x] Run focused tests, `npm test`, `npm run build`, and relevant Playwright desktop check.
+- [x] Complete Phase 1 functional flow after 01/02/03 reaches gameplay.
+- [x] Rework Phase 1 menus as DOM overlays that closely match the 01/02/03 frontend-design references.
+- [x] Verify Phase 1 DOM screenshots at `1440x900` for start, stage-select, and weapon-select.
 
-Last verified state:
+Phase 1 DOM menu alignment verified with:
 
-- `npm test` passed: 5 test files, 14 tests.
+- `npm test`
+- `npm run build`
+- `npm run e2e`
+- `test-results/phase1-dom-start-1440x900.png`
+- `test-results/phase1-dom-stage-1440x900.png`
+- `test-results/phase1-dom-weapon-1440x900.png`
+
+Last verified functional-flow state:
+
+- `npm test -- tests/menuFlow.test.ts` passed: 1 test file, 4 tests.
+- `npm test` passed: 6 test files, 18 tests.
 - `npm run build` passed.
 - `npm run e2e` passed.
-- Playwright desktop screenshot at `1440x900` confirmed the renewed menu renders without visible overlap.
+- Playwright desktop screenshots at `1440x900` confirmed the Phaser prototype start, stage-select, weapon-select, C/C++ weapon selection, and gameplay are distinct and render without visible overlap.
+- Keyboard check: `Enter`, number keys, and `ESC`-back flow are wired through the Phase 1 state model.
+- Pointer check: start command, stage confirm, weapon card selection, and start command reach gameplay.
 - Mobile verification is intentionally skipped for this prototype pass.
 - Vite still reports the existing chunk size warning; it is not a failure.
 
@@ -57,13 +92,9 @@ Files to inspect before continuing:
 
 Next recommended TDD slice:
 
-1. Add a small typed menu-flow model for Phase 1, probably under `src/ui/menuFlow.ts`.
-2. Write tests first for screen states: `start`, `stage-select`, `weapon-select`.
-3. Include transitions: start command -> stage select -> weapon select -> game start.
-4. Only after the model passes tests, wire `MenuScene` to render different panels based on that state.
-5. Keep `Enter`, number keys, and pointer interactions working.
-
-Do not start Phase 2 HUD work yet. Finish Phase 1's start/stage/weapon flow first.
+1. Open `docs/superpowers/plans/2026-04-27-ui-renewal-phase-1-dom-menu-alignment.md`.
+2. Execute Phase 1 DOM menu alignment task-by-task using `superpowers:subagent-driven-development` or `superpowers:executing-plans`.
+3. Complete Phase 1 DOM screenshot verification before starting Phase 2 implementation.
 
 ## Source Screens
 
@@ -103,7 +134,7 @@ Avoid:
 
 ## Implementation Phases
 
-### Phase 1: Core Menu Flow
+### Phase 1: Core Menu Flow + DOM Visual Alignment
 
 Target screens:
 
@@ -114,16 +145,18 @@ Target screens:
 Goal:
 
 - Establish the full pre-run flow from boot to stage and weapon selection.
-- Convert visual patterns into reusable menu components.
+- Convert visual patterns into a DOM overlay menu that closely matches the reference HTML screen structure.
+- Keep `src/ui/menuFlow.ts` as the tested state model and let `MenuScene` own only scene lifecycle and gameplay handoff.
 
 Likely components:
 
-- `TerminalWindow`
+- `MenuOverlay`
+- `StartBootScreen`
+- `StagePipelineScreen`
+- `WeaponSourceScreen`
 - `StatusBar`
 - `ExplorerList`
-- `CommandButton`
 - `CodePreview`
-- `ScreenHeader`
 
 Acceptance criteria:
 
@@ -131,8 +164,10 @@ Acceptance criteria:
 - Stage and weapon selections are keyboard/mouse friendly.
 - Locked stages and locked weapons are visually distinct but not visually noisy.
 - Menu screens share typography, spacing, and status bar behavior.
+- Start, stage-select, and weapon-select screenshots at `1440x900` clearly match the `codex_examples/01`, `02`, and `03` IDE layout language.
+- DOM overlay is removed before gameplay so it does not intercept gameplay input.
 
-### Phase 2: Runtime Overlay
+### Phase 2: Hybrid Runtime Overlay
 
 Target screens:
 
@@ -143,7 +178,7 @@ Target screens:
 Goal:
 
 - Make combat information readable while preserving gameplay visibility.
-- Separate always-on HUD from temporary alert overlays.
+- Keep always-on combat HUD in Phaser, and allow short event/boss overlays to use DOM when that better matches the reference screens.
 
 Likely components:
 
@@ -160,8 +195,9 @@ Acceptance criteria:
 - Quest/event UI does not block enemy patterns.
 - Boss warning has strong impact, then clears cleanly into gameplay.
 - Effects use short transitions and do not create persistent visual clutter.
+- DOM event/boss overlays, if used, clean themselves up before gameplay input resumes.
 
-### Phase 3: Decision and Result Screens
+### Phase 3: DOM Decision and Result Screens
 
 Target screens:
 
@@ -172,7 +208,7 @@ Target screens:
 Goal:
 
 - Turn reward, failure, and retry moments into clear command decisions.
-- Keep the coding theme while making choices fast to parse.
+- Use DOM overlays for layout-heavy Quick Fix, stage clear, and game over screens so they can closely match the reference HTML.
 
 Likely components:
 
@@ -197,6 +233,7 @@ Target screen:
 Goal:
 
 - Create a durable archive for unlocked weapons, monsters, boss logs, and learning progress.
+- Use a DOM codex layout because the screen is list/detail heavy and should resemble `codex_examples/10_collection_codex_frontend_design.html`.
 
 Likely components:
 
@@ -247,14 +284,14 @@ Standardize:
 Prefer Phaser for:
 
 - Gameplay HUD elements that need to follow camera/game state.
-- Boss warning transitions tied to scene timing.
 - Floating damage, combat effects, pickups, and telegraphs.
 
-Prefer DOM overlay or React-style UI for:
+Prefer DOM overlay UI for:
 
 - Start, stage select, weapon select, result, game over, codex.
 - Upgrade modal if the game can pause cleanly while the DOM handles selection.
 - Static menus, lists, inspectors, and long-form codex content.
+- Event toasts and boss warnings when visual similarity to the reference HTML is more important than frame-perfect gameplay timing.
 
 Decision checkpoint:
 
@@ -272,13 +309,13 @@ Decision checkpoint:
 ## Recommended Next Implementation Order
 
 1. Extract shared UI tokens and panel/status primitives.
-2. Implement Start screen using the 01 frontend-design reference.
-3. Implement Stage Select and Weapon Select as one continuous menu flow.
-4. Implement Runtime HUD with minimal debug log and quest slot.
-5. Implement Quick Fix modal.
-6. Implement Stage Clear and Game Over screens.
-7. Implement Boss Warning overlay.
-8. Implement Codex after core loop rewards/unlocks are stable.
+2. Rework Start, Stage Select, and Weapon Select as DOM overlay screens using the 01/02/03 frontend-design references.
+3. Verify DOM overlay cleanup before gameplay.
+4. Implement Runtime HUD with minimal debug log and quest slot in Phaser.
+5. Implement event toast and boss warning with the hybrid rule.
+6. Implement DOM Quick Fix modal.
+7. Implement DOM Stage Clear and Game Over screens.
+8. Implement DOM Codex after core loop rewards/unlocks are stable.
 
 ## Verification Plan
 

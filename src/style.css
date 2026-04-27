@@ -21,6 +21,11 @@ body,
   overflow: hidden;
 }
 
+#app {
+  position: relative;
+  min-height: 100vh;
+}
+
 body {
   display: grid;
   place-items: center;

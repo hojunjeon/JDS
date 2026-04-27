@@ -1,0 +1,367 @@
+:root {
+  --jds-bg: #1e1e1e;
+  --jds-sidebar: #252526;
+  --jds-status: #007acc;
+  --jds-white: #d4d4d4;
+  --jds-dim: #858585;
+  --jds-teal: #4ec9b0;
+  --jds-blue: #9cdcfe;
+  --jds-green: #b5cea8;
+  --jds-yellow: #dcdcaa;
+  --jds-orange: #ce9178;
+  --jds-red: #f44747;
+  --jds-comment: #6a9955;
+  --jds-line: #3c3c3c;
+}
+
+.jds-menu-root {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  color: var(--jds-white);
+  font-family: "JetBrains Mono", "Space Mono", "Noto Sans KR", Consolas, monospace;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.026) 1px, transparent 1px, transparent 4px),
+    radial-gradient(circle at 72% 30%, rgba(244, 71, 71, 0.09), transparent 300px),
+    radial-gradient(circle at 32% 66%, rgba(78, 201, 176, 0.14), transparent 430px),
+    var(--jds-bg);
+}
+
+.jds-menu {
+  height: calc(100vh - 52px);
+  margin: 26px;
+  border: 1px solid var(--jds-line);
+  background: rgba(30, 30, 30, 0.97);
+  display: grid;
+  grid-template-rows: 34px minmax(0, 1fr) 28px;
+  overflow: hidden;
+  box-shadow: 0 0 42px rgba(78, 201, 176, 0.14);
+}
+
+.jds-titlebar,
+.jds-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.jds-titlebar {
+  background: var(--jds-sidebar);
+  color: var(--jds-dim);
+  border-bottom: 1px solid var(--jds-line);
+}
+
+.jds-statusbar {
+  justify-content: space-between;
+  background: var(--jds-status);
+  color: #fff;
+}
+
+.jds-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.jds-dot.red { background: #ff5f57; }
+.jds-dot.yellow { background: #ffbd2e; }
+.jds-dot.green { background: #28c840; }
+
+.jds-workspace {
+  min-height: 0;
+  display: grid;
+  background: #151515;
+}
+
+.jds-workspace.three-col { grid-template-columns: 270px minmax(0, 1fr) 330px; }
+.jds-workspace.stage-layout { grid-template-columns: 238px minmax(0, 1fr) 316px; }
+
+.jds-sidebar {
+  min-width: 0;
+  background: rgba(37, 37, 38, 0.94);
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border-color: var(--jds-line);
+}
+
+.jds-sidebar:first-child { border-right: 1px solid var(--jds-line); }
+.jds-sidebar:last-child { border-left: 1px solid var(--jds-line); }
+
+.jds-center {
+  min-width: 0;
+  min-height: 0;
+  padding: 18px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.jds-screen-stage .jds-center,
+.jds-screen-weapon .jds-center {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.jds-label,
+.jds-eyebrow {
+  color: var(--jds-comment);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.jds-menu h1 {
+  margin: 0;
+  color: var(--jds-white);
+  font-size: clamp(42px, 7vw, 92px);
+  line-height: 0.88;
+  letter-spacing: 0;
+  text-shadow: 4px 0 rgba(78, 201, 176, 0.35), -3px 0 rgba(244, 71, 71, 0.24);
+}
+
+.jds-menu h2,
+.jds-menu h3,
+.jds-menu p {
+  margin: 0;
+}
+
+.jds-menu button {
+  border: 1px solid rgba(78, 201, 176, 0.42);
+  background: rgba(78, 201, 176, 0.08);
+  color: var(--jds-teal);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px 12px;
+}
+
+.jds-menu button:hover,
+.jds-menu button:focus-visible {
+  outline: 1px solid rgba(78, 201, 176, 0.72);
+}
+
+.jds-file {
+  display: grid;
+  gap: 3px;
+  border-left: 3px solid transparent;
+  color: var(--jds-dim);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.jds-file.active {
+  border-left-color: var(--jds-teal);
+  background: rgba(78, 201, 176, 0.08);
+  color: var(--jds-white);
+}
+
+.jds-file span,
+.jds-sidebar p,
+.jds-menu small {
+  color: var(--jds-dim);
+}
+
+.jds-sidebar .locked,
+.jds-stage.locked {
+  opacity: 0.48;
+}
+
+.jds-hero {
+  border: 1px solid rgba(78, 201, 176, 0.42);
+  border-left: 5px solid var(--jds-teal);
+  background: rgba(24, 24, 24, 0.95);
+  padding: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 18px;
+  align-items: center;
+}
+
+.jds-hero p {
+  color: var(--jds-dim);
+  line-height: 1.55;
+  margin-top: 12px;
+}
+
+.jds-boot-chip,
+.jds-panel,
+.jds-preview,
+.jds-code {
+  border: 1px solid rgba(212, 212, 212, 0.13);
+  background: rgba(8, 8, 8, 0.62);
+  padding: 14px;
+}
+
+.jds-boot-chip {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.jds-boot-chip strong {
+  color: var(--jds-teal);
+  font-size: 48px;
+}
+
+.jds-panel-grid,
+.jds-bench {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 12px;
+  min-height: 0;
+}
+
+.jds-panel {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.jds-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 10px;
+  align-items: center;
+}
+
+.jds-tabs {
+  display: flex;
+  height: 36px;
+  background: #181818;
+  border-bottom: 1px solid var(--jds-line);
+}
+
+.jds-tabs span {
+  min-width: 136px;
+  padding: 10px 13px 0;
+  color: var(--jds-dim);
+  border-right: 1px solid var(--jds-line);
+  font-size: 12px;
+}
+
+.jds-tabs .active {
+  color: var(--jds-white);
+  background: var(--jds-bg);
+  border-top: 2px solid var(--jds-teal);
+}
+
+.jds-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 312px);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.jds-head h1 {
+  font-size: clamp(30px, 4.8vw, 62px);
+  line-height: 0.94;
+}
+
+.jds-head code,
+.jds-actions code {
+  border: 1px solid rgba(78, 201, 176, 0.28);
+  border-left: 3px solid var(--jds-teal);
+  background: rgba(8, 8, 8, 0.64);
+  padding: 12px;
+  color: var(--jds-white);
+}
+
+.jds-stage-list {
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.jds-stage {
+  min-height: 96px;
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) 160px;
+  gap: 14px;
+  align-items: center;
+  border-color: var(--jds-line);
+  color: var(--jds-white);
+}
+
+.jds-stage.active {
+  border-color: rgba(78, 201, 176, 0.76);
+  box-shadow: 0 0 20px rgba(78, 201, 176, 0.11);
+}
+
+.jds-stage-id {
+  display: grid;
+  gap: 18px;
+  color: var(--jds-white);
+}
+
+.jds-stage-main {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.jds-stage-main b,
+.jds-stage-main small {
+  overflow-wrap: anywhere;
+}
+
+.jds-stage-id em,
+.jds-stage-state {
+  color: var(--jds-teal);
+  font-style: normal;
+  font-size: 12px;
+}
+
+.jds-code {
+  overflow: auto;
+  color: var(--jds-white);
+  margin: 0;
+  min-height: 0;
+}
+
+.jds-code code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.jds-preview {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-height: 0;
+}
+
+.jds-preview strong { color: var(--jds-teal); }
+.teal { color: var(--jds-teal); }
+.blue { color: var(--jds-blue); }
+.green { color: var(--jds-green); }
+.yellow { color: var(--jds-yellow); }
+.red { color: var(--jds-red); }
+
+@media (max-width: 920px) {
+  .jds-menu {
+    margin: 12px;
+    height: calc(100vh - 24px);
+  }
+
+  .jds-workspace.three-col,
+  .jds-workspace.stage-layout,
+  .jds-hero,
+  .jds-panel-grid,
+  .jds-bench,
+  .jds-head {
+    grid-template-columns: 1fr;
+  }
+
+  .jds-sidebar:last-child {
+    border-left: 0;
+    border-top: 1px solid var(--jds-line);
+  }
+
+  .jds-center {
+    overflow: auto;
+  }
+}
