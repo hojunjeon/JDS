@@ -465,7 +465,6 @@ git commit -m "test: cover DOM codex navigation"
 
 **Files:**
 
-- Modify: `codex_examples/UI_RENEWAL_PLAN.md`
 - Modify: `PLANS.md`
 
 - [ ] **Step 1: Run full verification**
@@ -482,18 +481,26 @@ Expected: all commands PASS.
 
 - [ ] **Step 2: Update roadmap**
 
-In `codex_examples/UI_RENEWAL_PLAN.md`, mark Phase 4 complete and record `test-results/codex-1440x900.png`.
+In this phase plan, mark Phase 4 complete and record `test-results/codex-1440x900.png`.
 
 - [ ] **Step 3: Update root index**
 
-Only after Phase 1 DOM alignment, Phase 2, Phase 3, and Phase 4 are all complete and verified, mark UI Renewal as `[x]` in `PLANS.md`.
+Only after Phase 1 DOM alignment, Phase 2, Phase 3, and Phase 4 are all complete and verified, move the UI Renewal completed work summary to `docs/superpowers/plans/ARCHIVE.md`.
+
+If no active work remains, replace `PLANS.md` with:
+
+```text
+# JDS Plans
+
+No active work. See docs/superpowers/plans/ARCHIVE.md.
+```
 
 - [ ] **Step 4: Commit**
 
 Run:
 
 ```bash
-git add PLANS.md codex_examples/UI_RENEWAL_PLAN.md
+git add PLANS.md docs/superpowers/plans/2026-04-27-ui-renewal-phase-4-meta-progression.md docs/superpowers/plans/ARCHIVE.md
 git commit -m "docs: mark UI renewal verified"
 ```
 

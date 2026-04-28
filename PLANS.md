@@ -1,28 +1,20 @@
 # JDS Plans
 
-Use this file as the root index for active project plans. When a session resets or the development environment changes, read this file first, then open the linked plan file for details.
+Active work: UI Renewal
 
-Status markers:
+## Phase Router
 
-- `[ ]` Not started
-- `[~]` In progress
-- `[x]` Complete
-
-## Active Plans
-
-- [~] UI Renewal
-  - Roadmap: `codex_examples/UI_RENEWAL_PLAN.md`
-  - Current execution plan: `docs/superpowers/plans/2026-04-27-ui-renewal-phase-1-dom-menu-alignment.md`
-  - Upcoming execution plans:
-    - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-2-runtime-overlay.md`
-    - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-3-decision-result.md`
-    - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-4-meta-progression.md`
-  - Current step: Phase 1 DOM menu alignment complete; implement Phase 2 hybrid runtime overlay next.
-  - Resume rule: open the roadmap, then execute the current phase plan task-by-task.
+- [x] Phase 1 - DOM Menu Alignment - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-1-dom-menu-alignment.md`
+- [~] Phase 2 - Runtime Overlay - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-2-runtime-overlay.md`
+- [ ] Phase 3 - Decision/Result Screens - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-3-decision-result.md`
+- [ ] Phase 4 - Meta Progression - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-4-meta-progression.md`
 
 ## Rules
 
-- Keep this file as a high-level index only.
-- Keep roadmap details inside the roadmap file.
-- Keep detailed task checklists inside `docs/superpowers/plans/`.
-- Do not mark a root plan `[x]` until every phase is implemented, verified, and recorded.
+- Resume from the single `[~]` phase.
+- Open that phase plan.
+- Continue from the first unchecked `[ ]` step in the phase plan.
+- Mark a phase `[x]` only after its final verification/docs step is checked.
+- If `PLANS.md` and a detail plan disagree, trust the detail plan.
+- When all phases for a large work are complete, move the completed work summary to `docs/superpowers/plans/ARCHIVE.md`.
+- If no active work remains, this file should say: `No active work. See docs/superpowers/plans/ARCHIVE.md.`

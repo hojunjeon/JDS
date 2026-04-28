@@ -1,4 +1,4 @@
-# UI Renewal Phase 1 DOM Menu Alignment Implementation Plan
+﻿# UI Renewal Phase 1 DOM Menu Alignment Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -42,7 +42,7 @@
 - Create: `src/ui/menuOverlay.ts`
 - Create: `tests/menuOverlay.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/menuOverlay.test.ts`:
 
@@ -82,16 +82,36 @@ describe('menuOverlay', () => {
     expect(html).toContain('Java.class');
     expect(html).toContain('start Stage 1');
   });
+
+  it('does not render mojibake placeholder copy', () => {
+    const html = [
+      renderMenuOverlayHtml(createMenuFlowState()),
+      renderMenuOverlayHtml({ ...createMenuFlowState(), screen: 'stage-select' }),
+      renderMenuOverlayHtml({ ...createMenuFlowState(), screen: 'weapon-select' }),
+    ].join('\n');
+
+    expect(html).not.toMatch(/[\u63f4\u6e72\u81fe\u745c\uf9e3\u6e90\u5ac4\u7337\u0080\u2501\u2466\u3008]/);
+  });
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npm test -- tests/menuOverlay.test.ts`
 
 Expected: FAIL because `src/ui/menuOverlay.ts` does not exist.
 
-- [ ] **Step 3: Add the HTML renderer**
+- [x] **Step 3: Confirm renderer data exports**
+
+Run:
+
+```bash
+rg -n "export const stages|export const starterWeaponConfigs" src/data/gameData.ts
+```
+
+Expected: both `export const stages` and `export const starterWeaponConfigs` are present in `src/data/gameData.ts`.
+
+- [x] **Step 4: Add the HTML renderer**
 
 Create `src/ui/menuOverlay.ts`:
 
@@ -126,7 +146,7 @@ function renderStart(): string {
             <div>
               <div class="jds-eyebrow">// SSAFY boot sequence initialized</div>
               <h1>JDS<br>Survival</h1>
-              <p>교실 터미널에서 runaway error를 정리하고 첫 boss trace까지 버티세요.</p>
+              <p>Clear runaway errors in the classroom terminal and survive to the first boss trace.</p>
             </div>
             <div class="jds-boot-chip"><span>Boot</span><strong>01</strong><em>ready</em></div>
           </div>
@@ -171,7 +191,7 @@ function renderStageSelect(state: MenuFlowState): string {
     return `
       <button class="jds-stage ${active ? 'active' : ''} ${locked ? 'locked' : ''}" data-stage-id="${stage.id}" ${locked ? 'disabled' : ''}>
         <span class="jds-stage-id">${stage.id.toString().padStart(2, '0')}<em>${locked ? 'LOCKED' : 'READY'}</em></span>
-        <span class="jds-stage-main"><b>${stage.title.replace(/^Stage \\d - /, '')}</b><small>${stage.theme}</small></span>
+        <span class="jds-stage-main"><b>${stage.title.replace(/^Stage \d - /, '')}</b><small>${stage.theme}</small></span>
         <span class="jds-stage-state">${active ? 'selected' : locked ? 'requires clear' : 'available'}</span>
       </button>
     `;
@@ -187,7 +207,7 @@ function renderStageSelect(state: MenuFlowState): string {
           <div class="jds-head"><div><div class="jds-eyebrow">// SSAFY curriculum is compiled as survival stages</div><h1>Stage Pipeline</h1></div><code>run stage_01 --mode survival</code></div>
           <div class="jds-stage-list">${rows}</div>
         </section>
-        <aside class="jds-sidebar"><div class="jds-label">Selected Stage</div><h2>Stage 1 Briefing</h2><p>Python 기본 문법 오류와 첫 이벤트를 처리하는 디버깅 생존 루트입니다.</p><button data-action="stage.confirm">continue to weapon select</button><button data-action="back">return to boot screen</button></aside>
+        <aside class="jds-sidebar"><div class="jds-label">Selected Stage</div><h2>Stage 1 Briefing</h2><p>Handle Python syntax errors and the first event while keeping the debugger route alive.</p><button data-action="stage.confirm">continue to weapon select</button><button data-action="back">return to boot screen</button></aside>
       </main>
       <footer class="jds-statusbar"><span>02_stage_select_frontend_design.html</span><span>1-6: select</span><span>ESC: back</span></footer>
     </section>
@@ -231,13 +251,13 @@ class ${selected.name.replace(/[^A-Za-z]/g, '')}Weapon:
 }
 ```
 
-- [ ] **Step 4: Run the focused test**
+- [x] **Step 5: Run the focused test**
 
 Run: `npm test -- tests/menuOverlay.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 6: Commit deferred**
 
 Run:
 
@@ -254,7 +274,7 @@ git commit -m "test: add DOM menu overlay renderer"
 - Modify: `src/main.ts`
 - Modify: `src/style.css`
 
-- [ ] **Step 1: Create the CSS file**
+- [x] **Step 1: Create the CSS file**
 
 Create `src/ui/menuOverlay.css`:
 
@@ -363,7 +383,7 @@ Create `src/ui/menuOverlay.css`:
 }
 ```
 
-- [ ] **Step 2: Import the CSS**
+- [x] **Step 2: Import the CSS**
 
 In `src/main.ts`, add:
 
@@ -373,7 +393,7 @@ import './ui/menuOverlay.css';
 
 Keep the existing `import './style.css';`.
 
-- [ ] **Step 3: Ensure the app root allows overlay layering**
+- [x] **Step 3: Ensure the app root allows overlay layering**
 
 In `src/style.css`, ensure `#app` or the canvas parent does not clip fixed overlays:
 
@@ -384,13 +404,13 @@ In `src/style.css`, ensure `#app` or the canvas parent does not clip fixed overl
 }
 ```
 
-- [ ] **Step 4: Run build**
+- [x] **Step 4: Run build**
 
 Run: `npm run build`
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit deferred**
 
 Run:
 
@@ -406,13 +426,17 @@ git commit -m "feat: style DOM menu overlay"
 - Modify: `src/ui/menuOverlay.ts`
 - Modify: `src/scenes/MenuScene.ts`
 
-- [ ] **Step 1: Add overlay mount API**
+- [x] **Step 1: Add overlay mount API**
 
-Append to `src/ui/menuOverlay.ts`:
+First, update the existing type import at the top of `src/ui/menuOverlay.ts` so `MenuFlowEvent` and `MenuFlowState` are imported from the same line:
 
 ```ts
-import type { MenuFlowEvent } from './menuFlow';
+import type { MenuFlowEvent, MenuFlowState } from './menuFlow';
+```
 
+Then append this API below the existing render helpers:
+
+```ts
 export interface MenuOverlayController {
   update(state: MenuFlowState): void;
   destroy(): void;
@@ -457,15 +481,28 @@ export function mountMenuOverlay(input: {
 }
 ```
 
-- [ ] **Step 2: Replace Phaser menu drawing in `MenuScene`**
+- [x] **Step 2: Replace Phaser menu drawing in `MenuScene`**
 
-In `src/scenes/MenuScene.ts`, import:
+In `src/scenes/MenuScene.ts`, import the overlay controller and keep `uiColors` imported from `../ui/theme`:
 
 ```ts
 import { mountMenuOverlay, type MenuOverlayController } from '../ui/menuOverlay';
+import { uiColors } from '../ui/theme';
 ```
 
-Replace the Phaser drawing fields and render calls with:
+Replace the old Phaser menu drawing state and render calls with the DOM overlay lifecycle.
+
+Remove these old Phaser-only pieces if they are still present from the pre-overlay menu:
+
+- `private selectedWeapon: WeaponId = 'python';`
+- imports only used by the old drawing path: `stages`, `WeaponId`, `toHexColor`, `uiFonts`, `uiLayout`
+- calls to `drawTerminalFrame()`, `drawBootHeader()`, `drawWeaponSelect()`, and `drawStartCommand()`
+- methods `drawTerminalFrame`, `drawBootHeader`, `drawWeaponSelect`, `drawStartCommand`, and `setWeapon`
+- pointer handlers that call `this.scene.restart()` to redraw the Phaser menu
+
+Keep `starterWeaponConfigs`, `createMenuFlowState`, `reduceMenuFlow`, `MenuFlowEvent`, `MenuFlowState`, `registerKeyboard()`, `handleEnter()`, `handleBack()`, `handleNumber()`, `dispatch()`, and `startGame()`.
+
+Add or keep:
 
 ```ts
 private overlay: MenuOverlayController | null = null;
@@ -493,7 +530,7 @@ private destroyOverlay(): void {
 
 Leave `menuFlow` dispatch behavior intact. Remove unused Phaser-only draw methods after `MenuScene` no longer calls them.
 
-- [ ] **Step 3: Destroy overlay before gameplay**
+- [x] **Step 3: Destroy overlay before gameplay**
 
 In `startGame()`, add `this.destroyOverlay();` before `this.scene.start(...)`:
 
@@ -504,7 +541,7 @@ private startGame(): void {
 }
 ```
 
-- [ ] **Step 4: Run verification**
+- [x] **Step 4: Run verification**
 
 Run:
 
@@ -515,7 +552,7 @@ npm run build
 
 Expected: both commands PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit deferred**
 
 Run:
 
@@ -530,11 +567,11 @@ git commit -m "feat: mount DOM menu overlay from MenuScene"
 
 - Modify: `src/scenes/MenuScene.ts`
 
-- [ ] **Step 1: Keep keyboard handling in `MenuScene` only**
+- [x] **Step 1: Keep keyboard handling in `MenuScene` only**
 
 Keep `registerKeyboard()`, `handleEnter()`, `handleBack()`, and `handleNumber()` in `MenuScene`. Do not add document-level keyboard listeners in `menuOverlay.ts`.
 
-- [ ] **Step 2: Verify keyboard flow manually**
+- [x] **Step 2: Verify keyboard flow manually**
 
 Run: `npm run dev`
 
@@ -546,7 +583,7 @@ Manual check at the local Vite URL:
 - `ESC` moves back one screen.
 - `Enter` on Weapon Select starts gameplay and removes `.jds-menu-root`.
 
-- [ ] **Step 3: Commit only if code changed**
+- [x] **Step 3: Commit only if code changed**
 
 If Task 3 already left keyboard handling correct, do not make a commit for this task.
 
@@ -556,7 +593,7 @@ If Task 3 already left keyboard handling correct, do not make a commit for this 
 
 - Modify: `tests/e2e/boot.spec.ts`
 
-- [ ] **Step 1: Replace the basic boot test with DOM-aware checks**
+- [x] **Step 1: Replace the basic boot test with DOM-aware checks**
 
 Use:
 
@@ -583,13 +620,13 @@ test('DOM menu flow reaches gameplay', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Run e2e**
+- [x] **Step 2: Run e2e**
 
 Run: `npm run e2e`
 
 Expected: PASS and three Phase 1 DOM screenshots exist under `test-results/`.
 
-- [ ] **Step 3: Inspect screenshots**
+- [x] **Step 3: Inspect screenshots**
 
 Confirm:
 
@@ -597,8 +634,9 @@ Confirm:
 - Stage screen visibly has Explorer, tabs, stage pipeline, selected stage briefing, and locked stages.
 - Weapon screen visibly has Explorer, tabs, code preview, effect preview/profile, and start action.
 - Text does not overlap at `1440x900`.
+- No screen shows mojibake codepoints, replacement-character boxes, or broken placeholder copy.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit deferred**
 
 Run:
 
@@ -612,9 +650,8 @@ git commit -m "test: cover DOM menu flow screenshots"
 **Files:**
 
 - Modify: `PLANS.md`
-- Modify: `codex_examples/UI_RENEWAL_PLAN.md`
 
-- [ ] **Step 1: Run full verification**
+- [x] **Step 1: Run full verification**
 
 Run:
 
@@ -626,9 +663,9 @@ npm run e2e
 
 Expected: all commands PASS.
 
-- [ ] **Step 2: Update roadmap completion state**
+- [x] **Step 2: Record phase completion in this plan**
 
-In `codex_examples/UI_RENEWAL_PLAN.md`, mark Phase 1 as visually realigned and record:
+In this phase plan, mark the Phase 1 verification/docs steps complete and record:
 
 ```text
 Phase 1 DOM menu alignment verified with:
@@ -640,22 +677,24 @@ Phase 1 DOM menu alignment verified with:
 - test-results/phase1-dom-weapon-1440x900.png
 ```
 
-- [ ] **Step 3: Update root index**
+Recorded on 2026-04-28 after screenshot inspection at 1440x900. Commit steps are marked deferred because this session did not request a git commit.
 
-In `PLANS.md`, set current step to:
+- [x] **Step 3: Update root index**
 
-```text
-Current step: Phase 1 DOM menu alignment complete; implement Phase 2 hybrid runtime overlay next.
-```
+In `PLANS.md`, mark Phase 1 `[x]` and Phase 2 `[~]` only after the final verification/docs step in this plan is checked.
 
-- [ ] **Step 4: Commit**
+If all UI Renewal phases are complete, move the completed work summary to `docs/superpowers/plans/ARCHIVE.md` instead of leaving the finished work active in `PLANS.md`.
+
+- [x] **Step 4: Commit deferred**
 
 Run:
 
 ```bash
-git add PLANS.md codex_examples/UI_RENEWAL_PLAN.md
+git add PLANS.md docs/superpowers/plans/2026-04-27-ui-renewal-phase-1-dom-menu-alignment.md docs/superpowers/plans/ARCHIVE.md
 git commit -m "docs: mark Phase 1 DOM menu alignment verified"
 ```
+
+Deferred: no commit was created in this session.
 
 ## Self-Review
 

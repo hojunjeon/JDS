@@ -2,7 +2,7 @@
 
 This document is the visual and technical design reference for JY Survival. Use it when implementing screens, HUD, weapons, monster sprites, effects, and Phaser systems.
 
-Reference HTML files stay in `examples/`. This document records what to adopt from them, not their full source code.
+Reference HTML files stay in `examples/` and `codex_examples/`. This document records what to adopt from them, not their full source code.
 
 ## Core Concept
 
@@ -25,6 +25,8 @@ Avoid:
 
 ## Reference Selection Rules
 
+- `codex_examples/01_start_screen_frontend_design.html` through `codex_examples/10_collection_codex_frontend_design.html` define the current UI renewal screen references.
+- `codex_examples/index.html` is a review deck for comparing those screen references, not a production screen by itself.
 - `examples/total_ui/` defines screen and UI language.
 - `examples/weapon_effect/` defines weapon effect motifs.
 - Under `examples/monster/`, files whose filename starts with `_` are the selected monster designs.
@@ -72,6 +74,7 @@ Use the VS Code-like palette from `examples/total_ui/start_screen.html` and `wea
 Reference:
 
 - `examples/total_ui/start_screen.html`
+- `codex_examples/01_start_screen_frontend_design.html`
 
 Adopt:
 
@@ -91,6 +94,7 @@ Implementation notes:
 Reference:
 
 - `examples/total_ui/weapon_select.html`
+- `codex_examples/03_weapon_select_frontend_design.html`
 
 Adopt:
 
@@ -110,6 +114,7 @@ Implementation notes:
 Reference:
 
 - `examples/total_ui/Debug Survival - Terminal UI-print.html`
+- `codex_examples/04_in_game_hud_frontend_design.html`
 
 Adopt:
 
@@ -122,6 +127,13 @@ Implementation notes:
 - HUD elements need stable dimensions.
 - Important combat state must be visible without reading long text.
 - Mobile or small viewport layouts should reduce text density before reducing legibility.
+
+### DOM and Phaser UI Split
+
+- Use DOM overlay UI for static, layout-heavy screens: start, stage select, weapon select, level-up choices, result screens, game over, and collection/codex.
+- Use Phaser UI for combat HUD elements that update every frame or need tight gameplay timing: HP/EXP/timer, weapon cooldowns, danger indicators, floating combat text, pickups, and player/enemy telegraphs.
+- Temporary overlays such as event toasts and boss warnings may use DOM when visual similarity to the UI references matters more than frame-perfect gameplay timing.
+- Remove or hide DOM overlays before active gameplay resumes so they do not intercept pointer or keyboard input.
 
 ## Weapons
 

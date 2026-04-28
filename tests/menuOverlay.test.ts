@@ -33,4 +33,15 @@ describe('menuOverlay', () => {
     expect(html).toContain('Java.class');
     expect(html).toContain('start Stage 1');
   });
+
+  it('does not render mojibake placeholder copy', () => {
+    const startHtml = renderMenuOverlayHtml(createMenuFlowState());
+    const stageHtml = renderMenuOverlayHtml({ ...createMenuFlowState(), screen: 'stage-select' });
+    const weaponHtml = renderMenuOverlayHtml({ ...createMenuFlowState(), screen: 'weapon-select' });
+    const html = [startHtml, stageHtml, weaponHtml].join('\n');
+
+    expect(html).not.toMatch(/[\u63f4\u6e72\u81fe\u745c\uf9e3\u6e90\u5ac4\u7337\u0080\u2501\u2466\u3008]/);
+    expect(startHtml).toContain('\uad50\uc2e4 \ud130\ubbf8\ub110\uc5d0\uc11c');
+    expect(stageHtml).toContain('Python \uae30\ubcf8 \ubb38\ubc95');
+  });
 });

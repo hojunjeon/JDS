@@ -475,7 +475,6 @@ git commit -m "test: cover decision overlay smoke flow"
 
 **Files:**
 
-- Modify: `codex_examples/UI_RENEWAL_PLAN.md`
 - Modify: `PLANS.md`
 
 - [ ] **Step 1: Run full verification**
@@ -492,20 +491,18 @@ Expected: all commands PASS.
 
 - [ ] **Step 2: Update docs**
 
-Mark Phase 3 complete in `codex_examples/UI_RENEWAL_PLAN.md`.
+In this phase plan, mark Phase 3 complete only after full verification passes.
 
-Set `PLANS.md` current execution plan to:
+In `PLANS.md`, mark Phase 3 `[x]` and Phase 4 `[~]` only after the final verification/docs step in this plan is checked.
 
-```text
-docs/superpowers/plans/2026-04-27-ui-renewal-phase-4-meta-progression.md
-```
+If all UI Renewal phases are complete, move the completed work summary to `docs/superpowers/plans/ARCHIVE.md` instead of leaving the finished work active in `PLANS.md`.
 
 - [ ] **Step 3: Commit**
 
 Run:
 
 ```bash
-git add PLANS.md codex_examples/UI_RENEWAL_PLAN.md
+git add PLANS.md docs/superpowers/plans/2026-04-27-ui-renewal-phase-3-decision-result.md docs/superpowers/plans/ARCHIVE.md
 git commit -m "docs: mark DOM decision screens verified"
 ```
 

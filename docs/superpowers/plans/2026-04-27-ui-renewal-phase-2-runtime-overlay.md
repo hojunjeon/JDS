@@ -478,7 +478,6 @@ git commit -m "feat: connect hybrid runtime overlays"
 **Files:**
 
 - Modify: `tests/e2e/boot.spec.ts`
-- Modify: `codex_examples/UI_RENEWAL_PLAN.md`
 - Modify: `PLANS.md`
 
 - [ ] **Step 1: Add screenshot evidence**
@@ -503,20 +502,18 @@ Expected: all commands PASS.
 
 - [ ] **Step 3: Update docs**
 
-In `codex_examples/UI_RENEWAL_PLAN.md`, mark Phase 2 complete only after the commands pass and screenshot is inspected.
+In this phase plan, mark Phase 2 complete only after the commands pass and screenshot is inspected.
 
-In `PLANS.md`, set current execution plan to:
+In `PLANS.md`, mark Phase 2 `[x]` and Phase 3 `[~]` only after the final verification/docs step in this plan is checked.
 
-```text
-docs/superpowers/plans/2026-04-27-ui-renewal-phase-3-decision-result.md
-```
+If all UI Renewal phases are complete, move the completed work summary to `docs/superpowers/plans/ARCHIVE.md` instead of leaving the finished work active in `PLANS.md`.
 
 - [ ] **Step 4: Commit**
 
 Run:
 
 ```bash
-git add tests/e2e/boot.spec.ts PLANS.md codex_examples/UI_RENEWAL_PLAN.md
+git add tests/e2e/boot.spec.ts PLANS.md docs/superpowers/plans/2026-04-27-ui-renewal-phase-2-runtime-overlay.md docs/superpowers/plans/ARCHIVE.md
 git commit -m "docs: mark hybrid runtime overlay verified"
 ```
 
