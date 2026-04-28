@@ -21,4 +21,6 @@ test('DOM menu flow reaches gameplay', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(page.locator('.jds-menu-root')).toHaveCount(0);
   await expect(page.locator('canvas')).toBeVisible();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: 'test-results/runtime-overlay-1440x900.png', fullPage: true });
 });

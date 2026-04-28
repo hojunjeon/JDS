@@ -5,8 +5,8 @@ Active work: UI Renewal
 ## Phase Router
 
 - [x] Phase 1 - DOM Menu Alignment - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-1-dom-menu-alignment.md`
-- [~] Phase 2 - Runtime Overlay - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-2-runtime-overlay.md`
-- [ ] Phase 3 - Decision/Result Screens - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-3-decision-result.md`
+- [x] Phase 2 - Runtime Overlay - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-2-runtime-overlay.md`
+- [~] Phase 3 - Decision/Result Screens - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-3-decision-result.md`
 - [ ] Phase 4 - Meta Progression - `docs/superpowers/plans/2026-04-27-ui-renewal-phase-4-meta-progression.md`
 
 ## Rules

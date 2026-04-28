@@ -2,7 +2,10 @@ import Phaser from 'phaser';
 import { enemies, stages, weapons } from '../data/gameData';
 import { EventSystem } from '../systems/EventSystem';
 import { WeaponSystem } from '../systems/WeaponSystem';
-import type { EnemyConfig, EnemyId, WeaponConfig, WeaponId } from '../types';
+import type { EnemyConfig, EnemyId, EventId, WeaponConfig, WeaponId } from '../types';
+import { buildRuntimeHudView, type RuntimeEventSummary } from '../ui/runtimeOverlay';
+import { clearRuntimeAlert, showBossWarning, showQuestToast } from '../ui/runtimeOverlayDom';
+import { toHexColor, uiColors, uiDepths, uiFonts, uiLayout } from '../ui/theme';
 
 interface EnemyActor {
   id: EnemyId;
@@ -37,8 +40,11 @@ export class GameScene extends Phaser.Scene {
   private spawnTimer = 0;
   private kills = 0;
   private hp = 100;
-  private banner!: Phaser.GameObjects.Text;
-  private hud!: Phaser.GameObjects.Text;
+  private hudPanel!: Phaser.GameObjects.Container;
+  private hudStatus!: Phaser.GameObjects.Text;
+  private hudVitals!: Phaser.GameObjects.Text;
+  private hudEvents!: Phaser.GameObjects.Text;
+  private hudBoss!: Phaser.GameObjects.Text;
   private eventLog!: Phaser.GameObjects.Text;
   private selectedWeapon: WeaponId = 'python';
   private isEnded = false;
@@ -60,13 +66,15 @@ export class GameScene extends Phaser.Scene {
     this.keys = this.input.keyboard!.addKeys('W,A,S,D,R,ESC') as Record<string, Phaser.Input.Keyboard.Key>;
     this.weaponSystem.addWeapon(this.selectedWeapon);
 
-    this.hud = this.add.text(18, 14, '', {
-      fontFamily: 'monospace',
-      fontSize: '15px',
-      color: '#d7dee8',
-      backgroundColor: '#0b1020',
-      padding: { left: 10, right: 10, top: 8, bottom: 8 },
-    }).setScrollFactor(0).setDepth(100);
+    this.hudPanel = this.add.container(18, 14).setScrollFactor(0).setDepth(uiDepths.hud);
+    const hudBg = this.add.rectangle(0, 0, 470, 116, toHexColor('bg'), 0.88).setOrigin(0, 0);
+    hudBg.setStrokeStyle(uiLayout.panelBorderWidth, toHexColor('dim'), 0.34);
+    const statusStrip = this.add.rectangle(0, 0, 470, 24, toHexColor('status'), 0.92).setOrigin(0, 0);
+    this.hudStatus = this.add.text(12, 5, '', { fontFamily: uiFonts.fallbackMono, fontSize: '13px', color: uiColors.white });
+    this.hudVitals = this.add.text(12, 34, '', { fontFamily: uiFonts.fallbackMono, fontSize: '14px', color: uiColors.green });
+    this.hudEvents = this.add.text(12, 58, '', { fontFamily: uiFonts.fallbackMono, fontSize: '12px', color: uiColors.dim, wordWrap: { width: 438 } });
+    this.hudBoss = this.add.text(12, 88, '', { fontFamily: uiFonts.fallbackMono, fontSize: '13px', color: uiColors.red });
+    this.hudPanel.add([hudBg, statusStrip, this.hudStatus, this.hudVitals, this.hudEvents, this.hudBoss]);
     this.eventLog = this.add.text(18, 554, 'boot: Stage 1 session opened', {
       fontFamily: 'monospace',
       fontSize: '14px',
@@ -74,16 +82,9 @@ export class GameScene extends Phaser.Scene {
       backgroundColor: '#0b1020',
       padding: { left: 10, right: 10, top: 8, bottom: 8 },
     }).setScrollFactor(0).setDepth(100);
-    this.banner = this.add.text(480, 96, '', {
-      fontFamily: 'monospace',
-      fontSize: '24px',
-      color: '#05070d',
-      backgroundColor: '#f5c542',
-      padding: { left: 14, right: 14, top: 8, bottom: 8 },
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(101).setVisible(false);
-
     this.input.keyboard?.on('keydown-R', () => this.scene.restart({ weapon: this.selectedWeapon }));
     this.input.keyboard?.on('keydown-ESC', () => this.scene.start('MenuScene'));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => clearRuntimeAlert());
   }
 
   update(_time: number, deltaMs: number): void {
@@ -213,7 +214,9 @@ export class GameScene extends Phaser.Scene {
       if (!alive) {
         this.kills += 1;
         const completed = this.eventSystem.notifyKill(enemy.id);
-        completed.forEach((event) => this.showBanner(`${event.id.toUpperCase()} complete: ${event.rewardText}`));
+        completed.forEach((event) => {
+          showQuestToast({ title: `${event.id.toUpperCase()} complete`, dialogue: event.dialogue, rewardText: event.rewardText });
+        });
         if (enemy.id === 'heal_bug') this.hp = Math.min(100, this.hp + 8);
         enemy.sprite.destroy();
       }
@@ -233,7 +236,7 @@ export class GameScene extends Phaser.Scene {
       if (event.id === 'boss') {
         this.spawnBoss();
       }
-      this.showBanner(event.title);
+      showQuestToast({ title: event.title, dialogue: event.dialogue, rewardText: event.rewardText });
       this.eventLog.setText(`event: ${event.dialogue}\nreward: ${event.rewardText}`);
     });
   }
@@ -243,37 +246,31 @@ export class GameScene extends Phaser.Scene {
     const bossConfig = stages[0].boss;
     const sprite = this.add.circle(this.player.x + 320, this.player.y - 260, 34, bossConfig.color).setStrokeStyle(3, 0xffffff);
     this.boss = { hp: bossConfig.hp, maxHp: bossConfig.hp, sprite };
+    showBossWarning(bossConfig);
     this.enemies.forEach((enemy) => enemy.sprite.destroy());
     this.enemies = [];
     this.cameras.main.shake(260, 0.008);
   }
 
   private updateHud(): void {
-    const eventStates = ['q1', 'e1', 'e2', 'boss']
-      .map((id) => this.eventSystem.getState(id as never))
-      .map((state) => `${state.id}:${state.completed ? 'done' : state.active ? 'run' : 'wait'}:${state.progress}`)
-      .join(' | ');
-    const bossLine = this.boss ? `\nboss.hp = ${Math.max(0, Math.ceil(this.boss.hp))}/${this.boss.maxHp}` : '';
-    this.hud.setText([
-      `stage = "${stages[0].title}"`,
-      `hp = ${Math.max(0, Math.ceil(this.hp))}/100   kills = ${this.kills}   time = ${Math.floor(this.elapsedSec)}s`,
-      `weapon = ${weapons[this.selectedWeapon].codeName}`,
-      eventStates + bossLine,
-      'move: WASD/arrows | R: restart | ESC: menu',
-    ]);
-  }
-
-  private showBanner(text: string): void {
-    this.banner.setText(text).setVisible(true);
-    this.tweens.killTweensOf(this.banner);
-    this.banner.setAlpha(1);
-    this.tweens.add({
-      targets: this.banner,
-      alpha: 0,
-      delay: 1400,
-      duration: 500,
-      onComplete: () => this.banner.setVisible(false),
+    const eventSummaries: RuntimeEventSummary[] = ['q1', 'e1', 'e2', 'boss']
+      .map((id) => this.eventSystem.getState(id as EventId));
+    const bossConfig = stages[0].boss;
+    const view = buildRuntimeHudView({
+      stageTitle: stages[0].title,
+      hp: this.hp,
+      maxHp: 100,
+      kills: this.kills,
+      elapsedSec: this.elapsedSec,
+      weaponCodeName: weapons[this.selectedWeapon].codeName,
+      events: eventSummaries,
+      boss: this.boss ? { name: bossConfig.name, hp: this.boss.hp, maxHp: this.boss.maxHp } : null,
     });
+
+    this.hudStatus.setText(view.statusLine);
+    this.hudVitals.setText(view.vitalsLine);
+    this.hudEvents.setText(view.eventLine);
+    this.hudBoss.setText(view.bossLine ?? 'move WASD/arrows | R restart | ESC menu');
   }
 
   private endRun(clear: boolean): void {

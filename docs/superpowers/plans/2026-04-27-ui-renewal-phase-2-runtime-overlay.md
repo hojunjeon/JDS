@@ -41,7 +41,7 @@
 - Create: `src/ui/runtimeOverlay.ts`
 - Create: `tests/runtimeOverlay.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/runtimeOverlay.test.ts`:
 
@@ -97,13 +97,13 @@ describe('runtimeOverlay', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npm test -- tests/runtimeOverlay.test.ts`
 
 Expected: FAIL because `src/ui/runtimeOverlay.ts` does not exist.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 Create `src/ui/runtimeOverlay.ts`:
 
@@ -165,13 +165,13 @@ function formatEvent(event: RuntimeEventSummary): string {
 }
 ```
 
-- [ ] **Step 4: Run the focused test**
+- [x] **Step 4: Run the focused test**
 
 Run: `npm test -- tests/runtimeOverlay.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run:
 
@@ -186,7 +186,7 @@ git commit -m "test: add runtime overlay view models"
 
 - Modify: `src/scenes/GameScene.ts`
 
-- [ ] **Step 1: Import helpers and theme tokens**
+- [x] **Step 1: Import helpers and theme tokens**
 
 Add:
 
@@ -196,7 +196,7 @@ import { buildRuntimeHudView, type RuntimeEventSummary } from '../ui/runtimeOver
 import { toHexColor, uiColors, uiDepths, uiFonts, uiLayout } from '../ui/theme';
 ```
 
-- [ ] **Step 2: Replace single HUD text with a panel**
+- [x] **Step 2: Replace single HUD text with a panel**
 
 Replace `private hud!: Phaser.GameObjects.Text;` with:
 
@@ -208,7 +208,7 @@ private hudEvents!: Phaser.GameObjects.Text;
 private hudBoss!: Phaser.GameObjects.Text;
 ```
 
-- [ ] **Step 3: Create compact HUD objects**
+- [x] **Step 3: Create compact HUD objects**
 
 Replace the current HUD creation block with:
 
@@ -224,7 +224,7 @@ this.hudBoss = this.add.text(12, 88, '', { fontFamily: uiFonts.fallbackMono, fon
 this.hudPanel.add([hudBg, statusStrip, this.hudStatus, this.hudVitals, this.hudEvents, this.hudBoss]);
 ```
 
-- [ ] **Step 4: Replace `updateHud()`**
+- [x] **Step 4: Replace `updateHud()`**
 
 Use:
 
@@ -251,7 +251,7 @@ private updateHud(): void {
 }
 ```
 
-- [ ] **Step 5: Run verification**
+- [x] **Step 5: Run verification**
 
 Run:
 
@@ -262,7 +262,7 @@ npm run build
 
 Expected: both PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 Run:
 
@@ -279,7 +279,7 @@ git commit -m "feat: render compact runtime HUD"
 - Create: `src/ui/runtimeOverlay.css`
 - Modify: `src/main.ts`
 
-- [ ] **Step 1: Create DOM alert helpers**
+- [x] **Step 1: Create DOM alert helpers**
 
 Create `src/ui/runtimeOverlayDom.ts`:
 
@@ -329,7 +329,7 @@ function showAlert(html: string, durationMs: number): void {
 }
 ```
 
-- [ ] **Step 2: Create alert CSS**
+- [x] **Step 2: Create alert CSS**
 
 Create `src/ui/runtimeOverlay.css`:
 
@@ -391,7 +391,7 @@ Create `src/ui/runtimeOverlay.css`:
 .jds-runtime-alert.boss code { color: #ce9178; }
 ```
 
-- [ ] **Step 3: Import CSS**
+- [x] **Step 3: Import CSS**
 
 In `src/main.ts`, add:
 
@@ -399,13 +399,13 @@ In `src/main.ts`, add:
 import './ui/runtimeOverlay.css';
 ```
 
-- [ ] **Step 4: Run build**
+- [x] **Step 4: Run build**
 
 Run: `npm run build`
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run:
 
@@ -420,7 +420,7 @@ git commit -m "feat: add DOM runtime alerts"
 
 - Modify: `src/scenes/GameScene.ts`
 
-- [ ] **Step 1: Import DOM alert helpers**
+- [x] **Step 1: Import DOM alert helpers**
 
 Add:
 
@@ -428,7 +428,7 @@ Add:
 import { clearRuntimeAlert, showBossWarning, showQuestToast } from '../ui/runtimeOverlayDom';
 ```
 
-- [ ] **Step 2: Replace old event banner calls**
+- [x] **Step 2: Replace old event banner calls**
 
 Where event trigger/completion text is currently shown, use:
 
@@ -436,7 +436,7 @@ Where event trigger/completion text is currently shown, use:
 showQuestToast({ title: event.title, dialogue: event.dialogue, rewardText: event.rewardText });
 ```
 
-- [ ] **Step 3: Replace boss warning call**
+- [x] **Step 3: Replace boss warning call**
 
 In `spawnBoss()`, call:
 
@@ -444,7 +444,7 @@ In `spawnBoss()`, call:
 showBossWarning(stages[0].boss);
 ```
 
-- [ ] **Step 4: Clear DOM alerts on scene shutdown**
+- [x] **Step 4: Clear DOM alerts on scene shutdown**
 
 In `create()`, add:
 
@@ -452,7 +452,7 @@ In `create()`, add:
 this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => clearRuntimeAlert());
 ```
 
-- [ ] **Step 5: Run verification**
+- [x] **Step 5: Run verification**
 
 Run:
 
@@ -464,7 +464,7 @@ npm run e2e
 
 Expected: all PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 Run:
 
@@ -480,7 +480,7 @@ git commit -m "feat: connect hybrid runtime overlays"
 - Modify: `tests/e2e/boot.spec.ts`
 - Modify: `PLANS.md`
 
-- [ ] **Step 1: Add screenshot evidence**
+- [x] **Step 1: Add screenshot evidence**
 
 Update or add an e2e flow that enters gameplay and captures:
 
@@ -488,7 +488,7 @@ Update or add an e2e flow that enters gameplay and captures:
 await page.screenshot({ path: 'test-results/runtime-overlay-1440x900.png', fullPage: true });
 ```
 
-- [ ] **Step 2: Run full verification**
+- [x] **Step 2: Run full verification**
 
 Run:
 
@@ -500,15 +500,22 @@ npm run e2e
 
 Expected: all commands PASS.
 
-- [ ] **Step 3: Update docs**
+- [x] **Step 3: Update docs**
 
 In this phase plan, mark Phase 2 complete only after the commands pass and screenshot is inspected.
+Phase 2 hybrid runtime overlay verified on 2026-04-28 with:
+- npm test
+- npm run build
+- npm run e2e
+- test-results/runtime-overlay-1440x900.png
+
+Screenshot inspection: compact Phaser HUD is visible in gameplay with status, vitals, event state, and controls. DOM quest and boss alert helpers are wired to gameplay events and clear on scene shutdown.
 
 In `PLANS.md`, mark Phase 2 `[x]` and Phase 3 `[~]` only after the final verification/docs step in this plan is checked.
 
 If all UI Renewal phases are complete, move the completed work summary to `docs/superpowers/plans/ARCHIVE.md` instead of leaving the finished work active in `PLANS.md`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Run:
 
